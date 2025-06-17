@@ -46,7 +46,6 @@ public class WarehouseGraph
             node.IsBlocked = isBlocked;
         }
     }
-
     public class Node
     {
         public int ID;
@@ -72,7 +71,8 @@ public class WarehouseGraph
         Elevator,
         InPort,
         OutPort,
-        Charger
+        Charger,
+        PathPoint
     }
   
 }
