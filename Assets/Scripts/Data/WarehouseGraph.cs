@@ -83,4 +83,5 @@ public class AGVAgent
     public float BatteryLevel = 100f;
     public List<int> currentPath;
     public TransportTask CurrentTask;
+    public float loads;
 }
