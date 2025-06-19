@@ -13,7 +13,7 @@ public class WarehouseGraph
         Edges = new List<Edge>();
     }
 
-    public void AddNode(int id, NodeType type, Vector3 position, int floor, float weightLimit)
+    public void AddNode(int id, NodeType type, Vector3 position, int floor, float weightLimit)//添加node
     {
         Nodes.Add(new Node
         {
@@ -26,7 +26,7 @@ public class WarehouseGraph
         });
     }
 
-    public void AddEdge(int fromNodeId, int toNodeId, float distance, bool isBidirectional, float congestion)
+    public void AddEdge(int fromNodeId, int toNodeId, float distance, bool isBidirectional, float congestion)//添加edge
     {
         Edges.Add(new Edge
         {
@@ -38,7 +38,7 @@ public class WarehouseGraph
         });
     }
 
-    public void addDoubleEdge(int NodeId1, int NodeId2, float distance, bool isBidirectional, float congestion)
+    public void AddDoubleEdge(int NodeId1, int NodeId2, float distance, bool isBidirectional, float congestion)//添加双向edge
     {
         Edges.Add(new Edge
         {
@@ -57,6 +57,11 @@ public class WarehouseGraph
             IsBidirectional = isBidirectional,
             Congestion = congestion
         });
+    }
+
+    public Node GetNode(int id)//通过nodeId获取Node实例
+    {
+        return Nodes.Find(n => n.ID == id);
     }
     
     public void UpdateNodeStatus(int nodeId, bool isBlocked)

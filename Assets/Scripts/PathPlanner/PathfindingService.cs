@@ -1,17 +1,38 @@
 using System.Collections.Generic;
 using Unity.Collections;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering.VirtualTexturing;
 
 public class PathfindingService
 {
+    private static PathfindingService _instance = null;
+
+    public static PathfindingService Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new PathfindingService();
+            }
+            
+            return _instance;
+        }
+    }
     private WarehouseGraph _graph;
 
-    public PathfindingService(WarehouseGraph graph)
+    private PathfindingService(WarehouseGraph graph)
     {
         _graph = graph;
     }
 
-    public List<int> FindPath(int start, int end, AGVAgent agv)
+    private PathfindingService()
+    {
+        _graph = new WarehouseGraph();
+    }
+    
+    public List<int> FindPath(int start, int end, AGVAgent agv)//寻找start到end的路径
     {
         // A* 算法，考虑拥堵系数、故障节点和电梯跨楼层
         var openList = new List<int>();
@@ -62,7 +83,35 @@ public class PathfindingService
         
         return null; // 无法到达
     }
+    
+    public void DrawGraphGizmos()//绘制仓库图gizmos
+    {
+        foreach (var edge in _graph.Edges)
+        {
+            var fromNode = _graph.GetNode(edge.FromNode);
+            var toNode = _graph.GetNode(edge.ToNode);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawSphere(fromNode.Position, 0.1f);
+            Gizmos.DrawSphere(toNode.Position, 0.1f);
+            Handles.Label(fromNode.Position, fromNode.ID.ToString());
+            Handles.Label(toNode.Position, toNode.ID.ToString());
+            Gizmos.DrawLine(fromNode.Position, toNode.Position);
+            
+        }
+    }
 
+    public void DrawPathGizmos(List<int> path)//绘制path路径的gizmos
+    {
+        if (_graph.Edges.Count == 0 || _graph.Edges.Count == 0)
+            return;
+        for (int i = 0; i < path.Count - 1; i++)
+        {
+            var fromNode = _graph.GetNode(path[i]);
+            var toNode = _graph.GetNode(path[i + 1]);
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(fromNode.Position, toNode.Position);
+        }
+    }
     private float Heuristic(int nodeId, int targetNodeId)
     {
         var node = _graph.Nodes.Find(node => node.ID == nodeId);
@@ -112,7 +161,7 @@ public class PathfindingService
         return path;
     }
 
-    public void GenerateTestGraph()
+    public void GenerateTestGraph()//生成测试仓库图
     {
         // 清除现有图数据
         _graph = new WarehouseGraph();
@@ -145,7 +194,7 @@ public class PathfindingService
                             _graph.Nodes.Find(n => n.ID == pathPointIds[row, col]).Position,
                             _graph.Nodes.Find(n => n.ID == pathPointIds[row, col + 1]).Position
                         );
-                        _graph.addDoubleEdge(pathPointIds[row, col], pathPointIds[row, col + 1], dist, true, 0.1f);
+                        _graph.AddDoubleEdge(pathPointIds[row, col], pathPointIds[row, col + 1], dist, true, 0.1f);
                     }
                     
                     // 垂直连接
@@ -155,7 +204,7 @@ public class PathfindingService
                             _graph.Nodes.Find(n => n.ID == pathPointIds[row, col]).Position,
                             _graph.Nodes.Find(n => n.ID == pathPointIds[row + 1, col]).Position
                         );
-                        _graph.addDoubleEdge(pathPointIds[row, col], pathPointIds[row + 1, col], dist, true, 0.1f);
+                        _graph.AddDoubleEdge(pathPointIds[row, col], pathPointIds[row + 1, col], dist, true, 0.1f);
                     }
                 }
             }
@@ -176,7 +225,7 @@ public class PathfindingService
                 // 连接到最近的路径点
                 int nearestPathId = pathPointIds[row, (i % 5)];
                 float dist = Vector3.Distance(pos, _graph.Nodes.Find(n => n.ID == nearestPathId).Position);
-                _graph.addDoubleEdge(id, nearestPathId, dist, true, 0.2f);
+                _graph.AddDoubleEdge(id, nearestPathId, dist, true, 0.2f);
             }
 
             // 添加电梯 (每层2个)
@@ -189,7 +238,7 @@ public class PathfindingService
                 // 连接到中央路径点
                 int connectPoint = pathPointIds[1, i == 0 ? 0 : 4];
                 float dist = Vector3.Distance(pos, _graph.Nodes.Find(n => n.ID == connectPoint).Position);
-                _graph.addDoubleEdge(id, connectPoint, dist, true, 0.3f);
+                _graph.AddDoubleEdge(id, connectPoint, dist, true, 0.3f);
             }
 
             // 1-2层添加充电点
@@ -204,7 +253,7 @@ public class PathfindingService
                     // 连接到最近的路径点
                     int nearestPathId = pathPointIds[2, 2];
                     float dist = Vector3.Distance(pos, _graph.Nodes.Find(n => n.ID == nearestPathId).Position);
-                    _graph.addDoubleEdge(id, nearestPathId, dist, true, 0.1f);
+                    _graph.AddDoubleEdge(id, nearestPathId, dist, true, 0.1f);
                 }
             }
 
@@ -219,7 +268,7 @@ public class PathfindingService
                 // 连接到最近的路径点
                 int nearestInPath = pathPointIds[0, 2];
                 float inDist = Vector3.Distance(inPos, _graph.Nodes.Find(n => n.ID == nearestInPath).Position);
-                _graph.addDoubleEdge(inPortId, nearestInPath, inDist, true, 0.1f);
+                _graph.AddDoubleEdge(inPortId, nearestInPath, inDist, true, 0.1f);
                 
                 // 出库口
                 int outPortId = 4001;
@@ -229,9 +278,13 @@ public class PathfindingService
                 // 连接到最近的路径点
                 int nearestOutPath = pathPointIds[2, 2];
                 float outDist = Vector3.Distance(outPos, _graph.Nodes.Find(n => n.ID == nearestOutPath).Position);
-                _graph.addDoubleEdge(outPortId, nearestOutPath, outDist, true, 0.1f);
+                _graph.AddDoubleEdge(outPortId, nearestOutPath, outDist, true, 0.1f);
             }
         }
+        _graph.AddDoubleEdge(108, 1108, 10.0f, false, 0.1f);
+        _graph.AddDoubleEdge(1108, 2108, 10.0f, false, 0.1f);
+        _graph.AddDoubleEdge(2108, 3108, 10.0f, false, 0.1f);
+
     }
 
     public void GenerateTestGraph1()

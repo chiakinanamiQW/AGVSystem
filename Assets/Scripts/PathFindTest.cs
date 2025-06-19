@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
@@ -11,18 +12,24 @@ public class PathFindTest : MonoBehaviour
     private List<int> _path = new List<int>();
     void Start()
     {
-        _pathfindingService = new PathfindingService(new WarehouseGraph());
+        _pathfindingService = PathfindingService.Instance;
         _pathfindingService.GenerateTestGraph();
-        _path = _pathfindingService.FindPath(4000, 4001, _agv);
+        _path = _pathfindingService.FindPath(3020, 4000, _agv); 
         for (int i = 0; i < _path.Count; i++)
         {
             Debug.Log(_path[i]);
         }
     }
-
-    // Update is called once per frame
-    void Update()
+    
+    private void OnDrawGizmos()
     {
-        
+        if(_pathfindingService != null)
+        {
+            _pathfindingService.DrawGraphGizmos();
+            if (_path != null)
+            {
+                _pathfindingService.DrawPathGizmos(_path);
+            }
+        }
     }
 }
