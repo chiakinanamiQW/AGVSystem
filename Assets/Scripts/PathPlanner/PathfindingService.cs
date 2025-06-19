@@ -22,6 +22,9 @@ public class PathfindingService
 
         openList.Add(start);
         gScores[start] = 0;
+        Debug.Log(_graph.Nodes.Find(node => node.ID == start).Position);
+        Debug.Log(_graph.Nodes.Find(node => node.ID == end).Position);
+
         fScores[start] = Heuristic(start, end);
 
         while (openList.Count > 0)
@@ -41,7 +44,7 @@ public class PathfindingService
             {
                 if (edge.FromNode == current && !closedList.Contains(edge.ToNode))
                 {
-                    if (_graph.Nodes[edge.ToNode].IsBlocked) continue; // 跳过故障节点
+                    if (_graph.Nodes.Find(node => node.ID == edge.ToNode).IsBlocked) continue; // 跳过故障节点
 
                     float tentativeGScore = gScores[current] + edge.Distance * (1 + edge.Congestion);
                     if (!openList.Contains(edge.ToNode))
@@ -114,7 +117,7 @@ public class PathfindingService
         // 清除现有图数据
         _graph = new WarehouseGraph();
 
-        // 创建4层仓库
+    // 创建4层仓库
         for (int floor = 0; floor < 4; floor++)
         {
             // 添加路径点 (3x5网格布局)
@@ -129,7 +132,7 @@ public class PathfindingService
                     pathPointIds[row, col] = id;
                 }
             }
-
+            
             // 连接路径点 (网格结构)
             for (int row = 0; row < 3; row++)
             {
@@ -142,7 +145,7 @@ public class PathfindingService
                             _graph.Nodes.Find(n => n.ID == pathPointIds[row, col]).Position,
                             _graph.Nodes.Find(n => n.ID == pathPointIds[row, col + 1]).Position
                         );
-                        _graph.AddEdge(pathPointIds[row, col], pathPointIds[row, col + 1], dist, true, 0.1f);
+                        _graph.addDoubleEdge(pathPointIds[row, col], pathPointIds[row, col + 1], dist, true, 0.1f);
                     }
                     
                     // 垂直连接
@@ -152,7 +155,7 @@ public class PathfindingService
                             _graph.Nodes.Find(n => n.ID == pathPointIds[row, col]).Position,
                             _graph.Nodes.Find(n => n.ID == pathPointIds[row + 1, col]).Position
                         );
-                        _graph.AddEdge(pathPointIds[row, col], pathPointIds[row + 1, col], dist, true, 0.1f);
+                        _graph.addDoubleEdge(pathPointIds[row, col], pathPointIds[row + 1, col], dist, true, 0.1f);
                     }
                 }
             }
@@ -173,7 +176,7 @@ public class PathfindingService
                 // 连接到最近的路径点
                 int nearestPathId = pathPointIds[row, (i % 5)];
                 float dist = Vector3.Distance(pos, _graph.Nodes.Find(n => n.ID == nearestPathId).Position);
-                _graph.AddEdge(id, nearestPathId, dist, true, 0.2f);
+                _graph.addDoubleEdge(id, nearestPathId, dist, true, 0.2f);
             }
 
             // 添加电梯 (每层2个)
@@ -186,7 +189,7 @@ public class PathfindingService
                 // 连接到中央路径点
                 int connectPoint = pathPointIds[1, i == 0 ? 0 : 4];
                 float dist = Vector3.Distance(pos, _graph.Nodes.Find(n => n.ID == connectPoint).Position);
-                _graph.AddEdge(id, connectPoint, dist, true, 0.3f);
+                _graph.addDoubleEdge(id, connectPoint, dist, true, 0.3f);
             }
 
             // 1-2层添加充电点
@@ -201,7 +204,7 @@ public class PathfindingService
                     // 连接到最近的路径点
                     int nearestPathId = pathPointIds[2, 2];
                     float dist = Vector3.Distance(pos, _graph.Nodes.Find(n => n.ID == nearestPathId).Position);
-                    _graph.AddEdge(id, nearestPathId, dist, true, 0.1f);
+                    _graph.addDoubleEdge(id, nearestPathId, dist, true, 0.1f);
                 }
             }
 
@@ -216,7 +219,7 @@ public class PathfindingService
                 // 连接到最近的路径点
                 int nearestInPath = pathPointIds[0, 2];
                 float inDist = Vector3.Distance(inPos, _graph.Nodes.Find(n => n.ID == nearestInPath).Position);
-                _graph.AddEdge(inPortId, nearestInPath, inDist, true, 0.1f);
+                _graph.addDoubleEdge(inPortId, nearestInPath, inDist, true, 0.1f);
                 
                 // 出库口
                 int outPortId = 4001;
@@ -226,7 +229,7 @@ public class PathfindingService
                 // 连接到最近的路径点
                 int nearestOutPath = pathPointIds[2, 2];
                 float outDist = Vector3.Distance(outPos, _graph.Nodes.Find(n => n.ID == nearestOutPath).Position);
-                _graph.AddEdge(outPortId, nearestOutPath, outDist, true, 0.1f);
+                _graph.addDoubleEdge(outPortId, nearestOutPath, outDist, true, 0.1f);
             }
         }
     }

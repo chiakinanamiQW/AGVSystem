@@ -38,6 +38,27 @@ public class WarehouseGraph
         });
     }
 
+    public void addDoubleEdge(int NodeId1, int NodeId2, float distance, bool isBidirectional, float congestion)
+    {
+        Edges.Add(new Edge
+        {
+            FromNode = NodeId1,
+            ToNode = NodeId2,
+            Distance = distance,
+            IsBidirectional = isBidirectional,
+            Congestion = congestion
+        });
+        
+        Edges.Add(new Edge
+        {
+            FromNode = NodeId2,
+            ToNode = NodeId1,
+            Distance = distance,
+            IsBidirectional = isBidirectional,
+            Congestion = congestion
+        });
+    }
+    
     public void UpdateNodeStatus(int nodeId, bool isBlocked)
     {
         var node = Nodes.Find(n => n.ID == nodeId);

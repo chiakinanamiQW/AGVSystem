@@ -12,8 +12,8 @@ public class PathFindTest : MonoBehaviour
     void Start()
     {
         _pathfindingService = new PathfindingService(new WarehouseGraph());
-        _pathfindingService.GenerateTestGraph1();
-        _path = _pathfindingService.FindPath(0, 22, _agv);
+        _pathfindingService.GenerateTestGraph();
+        _path = _pathfindingService.FindPath(4000, 4001, _agv);
         for (int i = 0; i < _path.Count; i++)
         {
             Debug.Log(_path[i]);
