@@ -7,7 +7,7 @@ using UnityEngine.Rendering.VirtualTexturing;
 public class PathfindingService
 {
     private static PathfindingService _instance = null;
-
+    
     public static PathfindingService Instance
     {
         get
@@ -20,14 +20,14 @@ public class PathfindingService
             return _instance;
         }
     }
-    private WarehouseGraph _graph;
+    public WarehouseGraph _graph;
 
     private PathfindingService(WarehouseGraph graph)
     {
         _graph = graph;
     }
 
-    private PathfindingService()
+    protected PathfindingService()
     {
         _graph = new WarehouseGraph();
     }
@@ -415,5 +415,7 @@ public class PathfindingService
                 }
             }
         }
+
+
     }
 }
