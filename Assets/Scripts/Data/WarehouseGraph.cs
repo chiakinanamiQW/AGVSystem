@@ -38,7 +38,7 @@ public class WarehouseGraph
         });
     }
 
-    public void AddDoubleEdge(int NodeId1, int NodeId2, float distance, bool isBidirectional, float congestion)//添加双向edge
+    public void AddDoubleEdge(int NodeId1, int NodeId2, float distance, bool isBidirectional, float congestion)//添加双向edge,注意该函数添加的两边属性一样
     {
         Edges.Add(new Edge
         {

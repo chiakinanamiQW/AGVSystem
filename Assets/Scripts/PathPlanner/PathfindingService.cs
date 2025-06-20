@@ -34,6 +34,9 @@ public class PathfindingService
     
     public List<int> FindPath(int start, int end, AGVAgent agv)//寻找start到end的路径
     {
+        if (_graph == null || _graph.GetNode(start) == null || _graph.GetNode(end) == null)
+            return null;
+        
         // A* 算法，考虑拥堵系数、故障节点和电梯跨楼层
         var openList = new List<int>();
         var closedList = new HashSet<int>();
@@ -43,8 +46,6 @@ public class PathfindingService
 
         openList.Add(start);
         gScores[start] = 0;
-        Debug.Log(_graph.Nodes.Find(node => node.ID == start).Position);
-        Debug.Log(_graph.Nodes.Find(node => node.ID == end).Position);
 
         fScores[start] = Heuristic(start, end);
 
@@ -114,8 +115,8 @@ public class PathfindingService
     }
     private float Heuristic(int nodeId, int targetNodeId)
     {
-        var node = _graph.Nodes.Find(node => node.ID == nodeId);
-        var targetNode = _graph.Nodes.Find(node1 => node1.ID == targetNodeId);
+        var node = _graph.GetNode(nodeId);
+        var targetNode = _graph.GetNode(targetNodeId);
         return Vector3.Distance(node.Position, targetNode.Position); // 使用欧几里得距离作为启发式
     }
 
@@ -289,31 +290,57 @@ public class PathfindingService
 
     public void GenerateTestGraph1()
     {
-        int id = 0;
-        for(int i = 0; i < 5; i++)
+            // 清空现有图数据
+            _graph = new WarehouseGraph();
+
+        // 创建四层仓库图
+        for (int floor = 1; floor <= 4; floor++)
         {
-            for (int j = 0; j < 5; j++)
+            // 添加当前层的25个节点（5x5网格）
+            for (int row = 0; row < 5; row++)
             {
-                _graph.AddNode(id, WarehouseGraph.NodeType.PathPoint, Vector3.zero + new Vector3(j, i, 0), 0,
-                    float.MaxValue);
-                id++;
+                for (int col = 0; col < 5; col++)
+                {
+                    // 计算节点ID：层数*1000 + (1-25)
+                    int nodeId = floor * 1000 + (row * 5 + col + 1);
+            
+                    // 计算节点位置：x=列索引*10, y=层高*20, z=行索引*10
+                    Vector3 position = new Vector3(col * 10, (floor - 1) * 20, row * 10);
+            
+                    // 添加节点（类型为PathPoint，承重限默认1000）
+                    _graph.AddNode(nodeId, WarehouseGraph.NodeType.PathPoint, position, floor, 1000);
+                }
             }
-        }
 
-        for (int i = 0; i < 20; i++)
-        {
-            _graph.AddEdge(i, i + 5, 10.0f, true, 0.1f);
-            _graph.AddEdge(i + 5, i, 10.0f, true, 0.1f);
-
-        }
-        
-        for(int i = 0; i < 4; i++)
-        {
-            for (int j = i; j < i + 21; j += 5)
+            // 创建当前层的内部连接（双向边）
+            for (int row = 0; row < 5; row++)
             {
-                _graph.AddEdge(j, j + 1, 10.0f, true, 0.1f);
-                _graph.AddEdge(j + 1, j, 10.0f, true, 0.1f);
+                for (int col = 0; col < 5; col++)
+                {
+                    int currentNodeId = floor * 1000 + (row * 5 + col + 1);
+            
+                    // 向右连接（如果不是最后一列）
+                    if (col < 4)
+                    {
+                        int rightNodeId = floor * 1000 + (row * 5 + (col + 1) + 1);
+                        _graph.AddDoubleEdge(currentNodeId, rightNodeId, 10, true, 0);
+                    }
+            
+                    // 向下连接（如果不是最后一行）
+                    if (row < 4)
+                    {
+                        int downNodeId = floor * 1000 + ((row + 1) * 5 + col + 1);
+                        _graph.AddDoubleEdge(currentNodeId, downNodeId, 10, true, 0);
+                    }
+                }
+            }
 
+            // 连接当前层和上一层（从第二层开始）
+            if (floor > 1)
+            {
+                int currentFirstNode = floor * 1000 + 1;
+                int upperFirstNode = (floor - 1) * 1000 + 1;
+                _graph.AddDoubleEdge(currentFirstNode, upperFirstNode, 20, true, 0);
             }
         }
     }

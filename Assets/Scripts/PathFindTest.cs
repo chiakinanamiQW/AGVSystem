@@ -13,8 +13,8 @@ public class PathFindTest : MonoBehaviour
     void Start()
     {
         _pathfindingService = PathfindingService.Instance;
-        _pathfindingService.GenerateTestGraph();
-        _path = _pathfindingService.FindPath(3020, 4000, _agv); 
+        _pathfindingService.GenerateTestGraph1();
+        _path = _pathfindingService.FindPath(1005, 4025, _agv); 
         for (int i = 0; i < _path.Count; i++)
         {
             Debug.Log(_path[i]);
