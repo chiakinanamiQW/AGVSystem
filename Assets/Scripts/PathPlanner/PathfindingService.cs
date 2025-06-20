@@ -92,12 +92,40 @@ public class PathfindingService
             var fromNode = _graph.GetNode(edge.FromNode);
             var toNode = _graph.GetNode(edge.ToNode);
             Gizmos.color = Color.yellow;
-            Gizmos.DrawSphere(fromNode.Position, 0.1f);
-            Gizmos.DrawSphere(toNode.Position, 0.1f);
-            Handles.Label(fromNode.Position, fromNode.ID.ToString());
-            Handles.Label(toNode.Position, toNode.ID.ToString());
             Gizmos.DrawLine(fromNode.Position, toNode.Position);
+        }
+
+        foreach (var node in _graph.Nodes)
+        {
+            switch (node.Type)
+            {
+                case WarehouseGraph.NodeType.PathPoint:
+                    Gizmos.color = Color.yellow;
+                    Gizmos.DrawSphere(node.Position, 0.1f);
+                    break;
+                case WarehouseGraph.NodeType.Shelf:
+                    Gizmos.color = Color.gray;
+                    Gizmos.DrawCube(node.Position, new Vector3(3f, 2.0f, 3f));
+                    break;
+                case WarehouseGraph.NodeType.Elevator:
+                    Gizmos.color = Color.white;
+                    Gizmos.DrawCube(node.Position, new Vector3(1.1f, 5f, 1.0f));
+                    break;
+                case WarehouseGraph.NodeType.Charger:
+                    Gizmos.color = Color.red;
+                    Gizmos.DrawCube(node.Position, new Vector3(3f, 1.0f, 3f));
+                    break;
+                case WarehouseGraph.NodeType.OutPort:
+                    Gizmos.color = Color.green;
+                    Gizmos.DrawCube(node.Position, new Vector3(0.1f, 0.1f, 0.2f));
+                    break;
+                case WarehouseGraph.NodeType.InPort:
+                    Gizmos.color = Color.green;
+                    Gizmos.DrawCube(node.Position, new Vector3(0.1f, 0.1f, 0.2f));
+                    break;
+            }
             
+            Handles.Label(node.Position, node.ID.ToString());
         }
     }
 
@@ -340,7 +368,51 @@ public class PathfindingService
             {
                 int currentFirstNode = floor * 1000 + 1;
                 int upperFirstNode = (floor - 1) * 1000 + 1;
+                int currentFirstNodeID = floor * 1000 + 2;
+                int upperFirstNodeID = (floor - 1) * 1000 + 2;
                 _graph.AddDoubleEdge(currentFirstNode, upperFirstNode, 20, true, 0);
+                _graph.AddDoubleEdge(currentFirstNodeID, upperFirstNodeID, 20, true, 0);
+            }
+        }
+
+        for (int floor = 1; floor <= 4; floor++)
+        {
+            if (floor == 1)
+            {
+                _graph.AddNode(0, WarehouseGraph.NodeType.InPort, _graph.GetNode(1011).Position - new Vector3(10, 0, 0), floor, 1000f);
+                _graph.AddNode(1, WarehouseGraph.NodeType.OutPort, _graph.GetNode(1015).Position + new Vector3(10, 0, 0), floor, 1000f);
+                foreach (int nodeId in new int[] { 1001, 1006, 1011, 1016, 1021 })
+                {
+                    float distance = Vector3.Distance(_graph.GetNode(0).Position, _graph.GetNode(nodeId).Position);
+                    _graph.AddDoubleEdge(0, nodeId, distance, false, 0);
+                    float distance1 = Vector3.Distance(_graph.GetNode(0).Position, _graph.GetNode(nodeId + 4).Position);
+                    _graph.AddDoubleEdge(1, nodeId + 4, distance1, false, 0);
+                }
+            }
+
+            if (floor == 1 || floor == 3)
+            {
+                int chargeNodeID1 = floor * 1000 + 100 + 1;
+                int chargeNodeID2 = floor * 1000 + 100 + 2;
+                
+                _graph.AddNode(chargeNodeID1, WarehouseGraph.NodeType.Charger, _graph.GetNode(floor * 1000 + 24).Position + new Vector3(0, 0, 10), floor, 1000f);
+                _graph.AddDoubleEdge(chargeNodeID1, floor * 1000 + 24, 10, false, 0);
+                _graph.AddNode(chargeNodeID2, WarehouseGraph.NodeType.Charger, _graph.GetNode(floor * 1000 + 22).Position + new Vector3(0, 0, 10), floor, 1000f);
+                _graph.AddDoubleEdge(chargeNodeID2, floor * 1000 + 22, 10, false, 0);
+            }
+            
+            int floorElevatorID1 = floor * 1000 + 1;
+            int floorElevatorID2 = floor * 1000 + 2;
+            _graph.GetNode(floorElevatorID1).Type = WarehouseGraph.NodeType.Elevator;
+            _graph.GetNode(floorElevatorID2).Type = WarehouseGraph.NodeType.Elevator;
+            
+            foreach(int floorShelfID in new int[]{7, 17})
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    int shelfID = floor * 1000 + floorShelfID + j;
+                    _graph.GetNode(shelfID).Type = WarehouseGraph.NodeType.Shelf;
+                }
             }
         }
     }
