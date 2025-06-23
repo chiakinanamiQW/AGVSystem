@@ -130,7 +130,7 @@ public class WarehouseGraph
 }
 
 // AGV代理类：表示自动引导车（AGV）在仓库中的状态
-public class AGVAgent
+public class AGVAgent//小车
 {
     public int AGVID;                   // AGV的唯一标识符
     public int CurrentNode;             // AGV当前所在的节点ID

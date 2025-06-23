@@ -5,22 +5,48 @@ using UnityEngine;
 
 public class CarController : MonoBehaviour
 {
+    private static CarController _instance = null;
+
+    public static CarController Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new CarController();
+            }
+
+            return _instance;
+        }
+    }
+    public WarehouseGraph _graph;
+
+    private CarController(WarehouseGraph graph)
+    {
+        _graph = graph;
+    }
+
+    private CarController()
+    {
+
+    }
+
     private PathfindingService _pathfindingServe = PathfindingService.Instance;
     private WarehouseGraph graph;
     private  List<int> _path = new List<int>();
     private AGVAgent _agv;
-    int startIndex = 1;
+    public int startIndex = 1102;
+
     private void Start()
     {
         _pathfindingServe = PathfindingService.Instance;
         graph = _pathfindingServe._graph;
-        
-        
     }
    
     [SerializeField] private float moveSpeed = 5f; // 移动速度
     [SerializeField] private float rotationSpeed = 5f; // 旋转速度
     [SerializeField] private float reachedDistance = 0.1f; // 到达节点的判定距离
+
 
     private List<Vector3> path = new List<Vector3>(); // 存储路径位置
     private int currentPathIndex = 0; // 当前路径点索引
@@ -30,7 +56,7 @@ public class CarController : MonoBehaviour
     public void CarMove(int end)
     {
         _path = _pathfindingServe.FindPath(startIndex, end, _agv);
-        this.gameObject.transform.position = graph.GetNode(startIndex).Position;
+/*        this.gameObject.transform.position = graph.GetNode(startIndex).Position;*/
         SetPath(_path);
     }
     private void SetPath(List<int> nodeIndices)
