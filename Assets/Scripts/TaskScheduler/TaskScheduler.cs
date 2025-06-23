@@ -78,3 +78,5 @@ public class TransportTask
     public int TargetNode;      // 送货节点ID（针对送货任务）
     public float Priority;      // 任务优先级（值越高越紧急）
 }
+
+//做一个输入端，任务列表，普通任务排序
