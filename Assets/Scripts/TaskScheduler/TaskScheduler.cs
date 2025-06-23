@@ -28,7 +28,7 @@ public class TaskScheduler
 
         // 规划多阶段路径（取货->送货->可选充电）
         var path = _pathfindingService.PlanMultiTaskPath(agv, agv.CurrentTask);
-        agv.currentPath = path; // 更新AGV路径
+        agv.CurrentPath = path; // 更新AGV路径
         // 注：完整实现中此处还应更新AGV工作状态
     }
 

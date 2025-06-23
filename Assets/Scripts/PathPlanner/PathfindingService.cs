@@ -147,36 +147,6 @@ public class PathfindingService
         var targetNode = _graph.GetNode(targetNodeId);
         return Vector3.Distance(node.Position, targetNode.Position); // 使用欧几里得距离作为启发式
     }
-
-    private int GetNodeWithLowestFScore(List<int> openList, Dictionary<int, float> fScores)
-    {
-        int lowestNode = -1;
-        float lowestFScore = float.MaxValue;
-
-        foreach (var node in openList)
-        {
-            if (fScores.ContainsKey(node) && fScores[node] < lowestFScore)
-            {
-                lowestFScore = fScores[node];
-                lowestNode = node;
-            }
-        }
-
-        return lowestNode;
-    }
-
-    private List<int> ReconstructPath(Dictionary<int, int> cameFrom, int currentNode)
-    {
-        var path = new List<int> { currentNode };
-        while (cameFrom.ContainsKey(currentNode))
-        {
-            currentNode = cameFrom[currentNode];
-            path.Insert(0, currentNode);
-        }
-
-        return path;
-    }
-
     public List<int> PlanMultiTaskPath(AGVAgent agv, TransportTask task)
     {
         // 规划多个任务的路径：取货 -> 送货 -> 充电
@@ -189,7 +159,7 @@ public class PathfindingService
 
         return path;
     }
-
+    
     public void GenerateTestGraph()//生成测试仓库图
     {
         // 清除现有图数据
@@ -315,7 +285,6 @@ public class PathfindingService
         _graph.AddDoubleEdge(2108, 3108, 10.0f, false, 0.1f);
 
     }
-
     public void GenerateTestGraph1()
     {
             // 清空现有图数据
@@ -411,11 +380,39 @@ public class PathfindingService
                 for (int j = 0; j < 3; j++)
                 {
                     int shelfID = floor * 1000 + floorShelfID + j;
+                    _graph.GetNode(shelfID).WeightLimit = 100 + j * 10 + floor;
                     _graph.GetNode(shelfID).Type = WarehouseGraph.NodeType.Shelf;
                 }
             }
         }
 
 
+    }
+    private int GetNodeWithLowestFScore(List<int> openList, Dictionary<int, float> fScores)
+    {
+        int lowestNode = -1;
+        float lowestFScore = float.MaxValue;
+
+        foreach (var node in openList)
+        {
+            if (fScores.ContainsKey(node) && fScores[node] < lowestFScore)
+            {
+                lowestFScore = fScores[node];
+                lowestNode = node;
+            }
+        }
+
+        return lowestNode;
+    }
+    private List<int> ReconstructPath(Dictionary<int, int> cameFrom, int currentNode)
+    {
+        var path = new List<int> { currentNode };
+        while (cameFrom.ContainsKey(currentNode))
+        {
+            currentNode = cameFrom[currentNode];
+            path.Insert(0, currentNode);
+        }
+
+        return path;
     }
 }
