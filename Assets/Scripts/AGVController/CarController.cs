@@ -34,11 +34,11 @@ public class CarController : MonoBehaviour
     private PathfindingService _pathfindingServe = PathfindingService.Instance;
     private WarehouseGraph graph;
     private  List<int> _path = new List<int>();
-    private AGVAgent _agv;
+    public AGVAgent _agv;
     
     public int startIndex = 1;
     public int currentIndex;
-
+    public List<TransportTask> Tasks;
 
     private void Start()
     {
@@ -135,7 +135,7 @@ public class CarController : MonoBehaviour
     private void OnPathCompleted()
     {
         Debug.Log("Path completed!");
-        // 这里可以添加路径完成后的逻辑
+        TaskScheduler.Instance.OnTaskCompleted(_agv);
     }
 
     // 绘制路径Gizmos（可选，用于调试）
@@ -157,3 +157,4 @@ public class CarController : MonoBehaviour
         }
     }
 }
+

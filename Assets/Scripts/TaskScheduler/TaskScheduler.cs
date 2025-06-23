@@ -5,17 +5,83 @@ using static TaskScheduler;
 /// <summary>
 /// 任务调度器：负责AGV（自动导引车）任务的创建、分配和管理
 /// </summary>
-public class TaskScheduler
+public class TaskScheduler : MonoBehaviour
 {
-    private PathfindingService _pathfindingService; // 路径规划服务，用于计算节点间路线
+    private static TaskScheduler _instance;
+    public static TaskScheduler Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindObjectOfType<TaskScheduler>();
+                if (_instance == null)
+                {
+                    GameObject obj = new GameObject("TaskScheduler");
+                    _instance = obj.AddComponent<TaskScheduler>();
+                }
+            }
+            return _instance;
+        }
+    }
+
+    private PathfindingService _pathfindingService;
+
+    private void Awake()
+    {
+        _pathfindingService = PathfindingService.Instance;
+    }
 
     /// <summary>
-    /// 构造函数：初始化任务调度器
+    /// 创建运输任务（包含取货和送货两个子任务）
     /// </summary>
-    /// <param name="pathfindingService">路径规划服务实例</param>
-    public TaskScheduler(PathfindingService pathfindingService)
+    /// <param name="source">起点货架ID</param>
+    /// <param name="target">终点货架ID</param>
+    /// <param name="priority">任务优先级</param>
+    public void CreateTransportTask(int source, int target, float priority)
     {
-        _pathfindingService = pathfindingService;
+        // 获取图实例
+        var graph = _pathfindingService._graph;
+
+        // 创建取货任务
+        TransportTask pickupTask = new TransportTask
+        {
+            TaskID = GenerateTaskID(),
+            Type = TaskType.Pickup,
+            SourceNode = source,
+            TargetNode = target,
+            Priority = priority,
+            Status = TaskStatus.Pending,
+            ShelfNodeID = source
+        };
+
+        // 创建送货任务
+        TransportTask deliveryTask = new TransportTask
+        {
+            TaskID = GenerateTaskID(),
+            Type = TaskType.Delivery,
+            SourceNode = source,
+            TargetNode = target,
+            Priority = priority,
+            Status = TaskStatus.Pending,
+            ShelfNodeID = target
+        };
+
+        // 添加到任务列表并排序
+        var carController = CarController.Instance;
+        carController.Tasks.Add(pickupTask);
+        carController.Tasks.Add(deliveryTask);
+
+        // 按优先级排序，Pickup任务在前
+        carController.Tasks.Sort((a, b) =>
+        {
+            if (a.Priority != b.Priority)
+                return b.Priority.CompareTo(a.Priority); // 高优先级在前
+            return a.Type.CompareTo(b.Type); // Pickup在前
+        });
+
+        // 处理任务执行顺序
+        HandleTaskExecution();
     }
 
     /// <summary>
@@ -24,36 +90,114 @@ public class TaskScheduler
     /// <param name="agv">待分配任务的AGV实例</param>
     public void AssignTask(AGVAgent agv)
     {
-        if (agv.CurrentTask == null) return; // 无待执行任务时跳过
+        if (agv.CurrentTask == null) return;
 
         // 规划多阶段路径（取货->送货->可选充电）
         var path = _pathfindingService.PlanMultiTaskPath(agv, agv.CurrentTask);
-        agv.CurrentPath = path; // 更新AGV路径
-        // 注：完整实现中此处还应更新AGV工作状态
+        agv.CurrentPath = path;
+
+        // 更新任务状态
+        agv.CurrentTask.Status = TaskStatus.InProgress;
+
+        // 通知小车开始移动
+        CarController.Instance.CarMove(agv.CurrentTask.TargetNode);
+    }
+
+    /// <summary>
+    /// 处理任务执行顺序逻辑
+    /// </summary>
+    private void HandleTaskExecution()
+    {
+        var carController = CarController.Instance;
+        var agv = carController._agv;
+
+        // 如果当前没有任务在执行
+        if (agv.CurrentTask == null && carController.Tasks.Count > 0)
+        {
+            StartNextTask();
+        }
+        // 如果有更高优先级任务且小车未载货
+        else if (carController.Tasks.Count > 0 &&
+                 carController.Tasks[0].Priority > agv.CurrentTask?.Priority &&
+                 agv.Loads <= 0)
+        {
+            // 中断当前任务（重新加入队列）
+            var interruptedTask = agv.CurrentTask;
+            interruptedTask.Status = TaskStatus.Pending;
+            carController.Tasks.Add(interruptedTask);
+
+            StartNextTask();
+        }
+    }
+
+    /// <summary>
+    /// 开始执行下一个任务
+    /// </summary>
+    private void StartNextTask()
+    {
+        var carController = CarController.Instance;
+        if (carController.Tasks.Count == 0) return;
+
+        var nextTask = carController.Tasks[0];
+        carController.Tasks.RemoveAt(0);
+
+        carController._agv.CurrentTask = nextTask;
+        AssignTask(carController._agv);
+    }
+
+    /// <summary>
+    /// 任务完成回调
+    /// </summary>
+    /// <param name="agv">完成任务的AGV实例</param>
+    public void OnTaskCompleted(AGVAgent agv)
+    {
+        if (agv.CurrentTask == null) return;
+
+        // 更新货架状态
+        var graph = _pathfindingService._graph;
+        var currentTask = agv.CurrentTask;
+
+        switch (currentTask.Type)
+        {
+            case TaskType.Pickup:
+                // 从货架取货
+                var sourceNode = graph.GetNode(currentTask.SourceNode);
+                float pickupAmount = Mathf.Min(sourceNode.Weight, agv.MaxLoad - agv.Loads);
+                sourceNode.Weight -= pickupAmount;
+                agv.Loads += pickupAmount;
+                break;
+
+            case TaskType.Delivery:
+                // 送货到货架
+                var targetNode = graph.GetNode(currentTask.TargetNode);
+                float availableCapacity = targetNode.WeightLimit - targetNode.Weight;
+                float deliveryAmount = Mathf.Min(agv.Loads, availableCapacity);
+                targetNode.Weight += deliveryAmount;
+                agv.Loads -= deliveryAmount;
+                break;
+        }
+
+        // 更新任务状态
+        currentTask.Status = TaskStatus.Completed;
+
+        // 开始下一个任务
+        StartNextTask();
+    }
+
+    /// <summary>
+    /// 生成随机任务ID
+    /// </summary>
+    private int GenerateTaskID()
+    {
+        return Random.Range(1000, 9999);
     }
 
     /// <summary>
     /// 创建手动任务（通常由用户界面调用）
     /// </summary>
-    /// <param name="source">取货节点ID</param>
-    /// <param name="target">送货节点ID</param>
     public void CreateManualTask(int source, int target)
     {
-        // 创建新运输任务
-        TransportTask newTask = new TransportTask
-        {
-            TaskID = Random.Range(0, 1000), // 生成随机任务ID
-            Type = TaskType.Pickup,        // 默认取货任务
-            SourceNode = source,          // 设置取货位置
-            TargetNode = target,          // 设置送货位置
-            Priority = 1                   // 默认优先级（1=普通）
-        };
-
-        // 实际实现中应分配给空闲AGV
-        // 此处创建临时AGV用于演示
-        AGVAgent agv = new AGVAgent();
-        agv.CurrentTask = newTask;
-        AssignTask(agv); // 立即分配任务
+        CreateTransportTask(source, target, 1); // 默认优先级为1
     }
 
     /// <summary>
@@ -65,6 +209,17 @@ public class TaskScheduler
         Delivery,  // 送货任务
         Charge     // 充电任务
     }
+
+    /// <summary>
+    /// 任务状态枚举
+    /// </summary>
+    public enum TaskStatus
+    {
+        Pending,     // 等待中
+        InProgress,  // 执行中
+        Completed,   // 已完成
+        Failed       // 失败
+    }
 }
 
 /// <summary>
@@ -73,10 +228,18 @@ public class TaskScheduler
 public class TransportTask
 {
     public int TaskID;          // 任务唯一标识符
-    public TaskType Type;       // 任务类型（取货/送货/充电）
+    public TaskScheduler.TaskType Type;       // 任务类型（取货/送货/充电）
     public int SourceNode;      // 取货节点ID（针对取货任务）
     public int TargetNode;      // 送货节点ID（针对送货任务）
     public float Priority;      // 任务优先级（值越高越紧急）
+    public TaskScheduler.TaskStatus Status;   // 任务当前状态
+    public int ShelfNodeID;     // 关联的货架节点ID（用于快速访问）
 }
 
-//做一个输入端，任务列表，普通任务排序
+/// <summary>
+/// AGV代理类扩展
+/// </summary>
+public partial class AGVAgent
+{
+    public float MaxLoad = 100f; // AGV最大载重量
+}

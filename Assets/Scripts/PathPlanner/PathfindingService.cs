@@ -31,7 +31,7 @@ public class PathfindingService
     {
         _graph = new WarehouseGraph();
     }
-    
+
     public List<int> FindPath(int start, int end, AGVAgent agv)//寻找start到end的路径
     {
         if (_graph == null || _graph.GetNode(start) == null || _graph.GetNode(end) == null)
@@ -416,3 +416,4 @@ public class PathfindingService
         return path;
     }
 }
+
