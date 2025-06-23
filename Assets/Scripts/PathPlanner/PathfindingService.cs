@@ -382,6 +382,10 @@ public class PathfindingService
                     int shelfID = floor * 1000 + floorShelfID + j;
                     _graph.GetNode(shelfID).WeightLimit = floor * 20;
                     _graph.GetNode(shelfID).Type = WarehouseGraph.NodeType.Shelf;
+                    if(floor == 1)
+                    {
+                        _graph.GetNode(shelfID).Weight = 10;
+                    }
                 }
             }
         }

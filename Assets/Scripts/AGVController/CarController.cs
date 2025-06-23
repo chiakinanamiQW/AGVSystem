@@ -13,9 +13,14 @@ public class CarController : MonoBehaviour
         {
             if (_instance == null)
             {
-                _instance = new CarController();
+                _instance = FindObjectOfType<CarController>();
+                if (_instance == null)
+                {
+                    GameObject obj = new GameObject("CarController");
+                    _instance = obj.AddComponent<CarController>();
+                    DontDestroyOnLoad(obj); // 可选：跨场景保持
+                }
             }
-
             return _instance;
         }
     }

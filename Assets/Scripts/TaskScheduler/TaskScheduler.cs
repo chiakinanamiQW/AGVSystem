@@ -8,17 +8,38 @@ using static TaskScheduler;
 public class TaskScheduler : MonoBehaviour
 {
     private static TaskScheduler _instance;
+    //public static TaskScheduler Instance
+    //{
+    //    get
+    //    {
+    //        if (_instance == null)
+    //        {
+    //            _instance = FindObjectOfType<TaskScheduler>();
+    //            if (_instance == null)
+    //            {
+    //                GameObject obj = new GameObject("TaskScheduler");
+    //                _instance = obj.AddComponent<TaskScheduler>();
+    //            }
+    //        }
+    //        return _instance;
+    //    }
+    //}
+
     public static TaskScheduler Instance
     {
         get
         {
             if (_instance == null)
             {
+                // 通过 FindObjectOfType 查找现有实例
                 _instance = FindObjectOfType<TaskScheduler>();
+
+                // 如果不存在，创建一个新的 GameObject 并挂载组件
                 if (_instance == null)
                 {
                     GameObject obj = new GameObject("TaskScheduler");
                     _instance = obj.AddComponent<TaskScheduler>();
+                    DontDestroyOnLoad(obj); // 可选：跨场景保持
                 }
             }
             return _instance;
@@ -30,6 +51,10 @@ public class TaskScheduler : MonoBehaviour
     private void Awake()
     {
         _pathfindingService = PathfindingService.Instance;
+        if (_pathfindingService == null)
+        {
+            Debug.LogError("未找到 PathfindingService 实例！");
+        }
     }
 
     /// <summary>
@@ -40,6 +65,12 @@ public class TaskScheduler : MonoBehaviour
     /// <param name="priority">任务优先级</param>
     public void CreateTransportTask(int source, int target, float priority)
     {
+        if (_pathfindingService == null)
+        {
+            Debug.LogError("PathfindingService 未初始化！");
+            return;
+        }
+
         // 获取图实例
         var graph = _pathfindingService._graph;
 
