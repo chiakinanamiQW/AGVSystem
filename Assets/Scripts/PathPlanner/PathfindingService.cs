@@ -380,7 +380,7 @@ public class PathfindingService
                 for (int j = 0; j < 3; j++)
                 {
                     int shelfID = floor * 1000 + floorShelfID + j;
-                    _graph.GetNode(shelfID).WeightLimit = 100 + j * 10 + floor;
+                    _graph.GetNode(shelfID).WeightLimit = floor * 20;
                     _graph.GetNode(shelfID).Type = WarehouseGraph.NodeType.Shelf;
                 }
             }

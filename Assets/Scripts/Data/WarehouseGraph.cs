@@ -105,7 +105,7 @@ public class WarehouseGraph
         public Vector3 Position;            // 节点的三维位置坐标
         public int Floor;                   // 节点所在的楼层编号
         public float WeightLimit;           // 节点的承重限制（用于货架等）
-        public float Weight;                //节点现承载重量
+        public float Weight;                //节点现承载重量（用于货架)
         public bool IsBlocked;              // 节点是否被阻塞（如故障）
     }
 
