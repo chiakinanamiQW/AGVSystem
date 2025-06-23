@@ -35,7 +35,10 @@ public class CarController : MonoBehaviour
     private WarehouseGraph graph;
     private  List<int> _path = new List<int>();
     private AGVAgent _agv;
-    public int startIndex = 1102;
+    
+    public int startIndex = 1;
+    public int currentIndex;
+
 
     private void Start()
     {
@@ -47,9 +50,9 @@ public class CarController : MonoBehaviour
     [SerializeField] private float rotationSpeed = 5f; // 旋转速度
     [SerializeField] private float reachedDistance = 0.1f; // 到达节点的判定距离
 
-
+    private List<int> pathNodeIndices = new List<int>();
     private List<Vector3> path = new List<Vector3>(); // 存储路径位置
-    private int currentPathIndex = 0; // 当前路径点索引
+    public int currentPathIndex = 0; // 当前路径点索引
     private bool isMoving = false; // 是否正在移动
     
     // 设置路径并开始移动
@@ -64,31 +67,24 @@ public class CarController : MonoBehaviour
         if (nodeIndices == null || nodeIndices.Count == 0 || graph == null)
             return;
 
-        // 将节点索引转换为位置列表
+        // 1. 保存节点 ID 列表
+        pathNodeIndices = new List<int>(nodeIndices);
+
+        // 2. 把节点位置转换成 world-space 路径
         path.Clear();
-       /* foreach (int index in nodeIndices)
+        foreach (int id in pathNodeIndices)
         {
-            var node = graph.GetNode(index);
+            var node = graph.GetNode(id);
             if (node != null)
-            {
                 path.Add(node.Position);
-            }
-        }*/
-        for (int i = 0; i < _path.Count; i++)
-        {
-            var node = graph.GetNode(nodeIndices[i]);
-            if (node != null)
-            {
-                path.Add(node.Position);
-            }
-            startIndex = nodeIndices[_path.Count - 1];
         }
 
-        if (path.Count > 0)
-        {
-            currentPathIndex = 0;
-            isMoving = true;
-        }
+        // 3. 重置行进状态
+        currentPathIndex = 0;
+        isMoving = true;
+
+        // 4. 初始化 currentIndex——此时 AGV 位于路径第一个节点上
+        currentIndex = pathNodeIndices[0];
     }
 
     void Update()
@@ -97,6 +93,7 @@ public class CarController : MonoBehaviour
 
         // 获取当前目标点
         Vector3 targetPosition = path[currentPathIndex];
+
 
         // 移动物体
         transform.position = Vector3.MoveTowards(
@@ -117,12 +114,12 @@ public class CarController : MonoBehaviour
             );
         }
 
-        // 检查是否到达当前目标点
         if (Vector3.Distance(transform.position, targetPosition) <= reachedDistance)
         {
-            currentPathIndex++;
+            // 更新 currentIndex 为刚到达的节点
+            currentIndex = pathNodeIndices[currentPathIndex];
 
-            // 检查是否到达终点
+            currentPathIndex++;
             if (currentPathIndex >= path.Count)
             {
                 isMoving = false;
@@ -130,7 +127,10 @@ public class CarController : MonoBehaviour
             }
         }
     }
-
+    public int GetCurrentNodeId()
+    {
+        return currentIndex;
+    }
     // 路径完成时的回调
     private void OnPathCompleted()
     {
