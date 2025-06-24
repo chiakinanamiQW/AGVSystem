@@ -100,8 +100,11 @@ public class TaskScheduler : MonoBehaviour
 
         // 添加到任务列表并排序
 
+        Debug.Log(CarController.Instance.Tasks == null);
+
         CarController.Instance.Tasks.Add(pickupTask);
 
+        Debug.Log(CarController.Instance.Tasks == null);
         CarController.Instance.Tasks.Add(deliveryTask);
 
         // 按优先级排序，Pickup任务在前

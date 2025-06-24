@@ -56,7 +56,7 @@ public class CarController : MonoBehaviour
     
     public int startIndex = 1;
     public int currentIndex;
-    public List<TransportTask> Tasks;
+    public List<TransportTask> Tasks = new List<TransportTask>();
 
     private void Start()
     {
