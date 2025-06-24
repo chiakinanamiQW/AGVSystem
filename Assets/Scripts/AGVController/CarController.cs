@@ -26,6 +26,19 @@ public class CarController : MonoBehaviour
     }
     public WarehouseGraph _graph;
 
+    private void Awake()
+    {
+        if (_agv == null)
+        {
+            _agv = new AGVAgent
+            {
+                AGVID = 1,
+                CurrentNode = startIndex,
+                Loads = 0
+            };
+        }
+    }
+
     private CarController(WarehouseGraph graph)
     {
         _graph = graph;

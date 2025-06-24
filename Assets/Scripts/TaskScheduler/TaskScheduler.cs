@@ -99,12 +99,14 @@ public class TaskScheduler : MonoBehaviour
         };
 
         // 添加到任务列表并排序
-        var carController = CarController.Instance;
-        carController.Tasks.Add(pickupTask);
-        carController.Tasks.Add(deliveryTask);
+
+        CarController.Instance.Tasks.Add(pickupTask);
+
+        CarController.Instance.Tasks.Add(deliveryTask);
 
         // 按优先级排序，Pickup任务在前
-        carController.Tasks.Sort((a, b) =>
+
+        CarController.Instance.Tasks.Sort((a, b) =>
         {
             if (a.Priority != b.Priority)
                 return b.Priority.CompareTo(a.Priority); // 高优先级在前
