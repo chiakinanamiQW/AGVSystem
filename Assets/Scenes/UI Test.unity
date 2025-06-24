@@ -2124,6 +2124,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startIndex: 1102
   currentIndex: 0
+  electric: 0
   moveSpeed: 5
   rotationSpeed: 5
   reachedDistance: 0.1

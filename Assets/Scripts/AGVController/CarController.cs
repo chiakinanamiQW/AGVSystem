@@ -57,6 +57,23 @@ public class CarController : MonoBehaviour
     public int startIndex = 1;
     public int currentIndex;
     public List<TransportTask> Tasks = new List<TransportTask>();
+    
+    public int electric;//剩余电量
+    public float time//预计完成时间
+    {
+        get
+        {
+            return 0;
+        }
+    }
+    public float total_energy { get; }//路径能耗
+
+    public bool exception;//是否异常
+    private float per_energy { get; }
+
+    
+
+    private float per_distance;
 
     private void Start()
     {
