@@ -79,8 +79,8 @@ public class TaskScheduler : MonoBehaviour
         {
             TaskID = GenerateTaskID(),
             Type = TaskType.Pickup,
-            SourceNode = source,
-            TargetNode = target,
+            SourceNode = CarController.Instance.currentIndex,
+            TargetNode = source,
             Priority = priority,
             Status = TaskStatus.Pending,
             ShelfNodeID = source
