@@ -53,7 +53,7 @@ public class CarController : MonoBehaviour
     private WarehouseGraph graph;
     private  List<int> _path = new List<int>();
     public AGVAgent _agv;
-    
+    private int times = 0;
     public int startIndex = 1;
     public int currentIndex;
     public List<TransportTask> Tasks = new List<TransportTask>();
@@ -76,9 +76,20 @@ public class CarController : MonoBehaviour
     // 设置路径并开始移动
     public void CarMove(int end)
     {
-        _path = _pathfindingServe.FindPath(startIndex, end, _agv);
+        if (times > 0)
+        {
+            _path = _pathfindingServe.FindPath(currentIndex, end, _agv);
+            times++;
+        }
+        else
+        {
+            _path = _pathfindingServe.FindPath(startIndex, end, _agv);
+            times++;
+        }
 /*        this.gameObject.transform.position = graph.GetNode(startIndex).Position;*/
         SetPath(_path);
+        
+        
     }
     private void SetPath(List<int> nodeIndices)
     {
@@ -154,6 +165,7 @@ public class CarController : MonoBehaviour
     {
         Debug.Log("Path completed!");
         TaskScheduler.Instance.OnTaskCompleted(_agv);
+       
     }
 
     // 绘制路径Gizmos（可选，用于调试）
