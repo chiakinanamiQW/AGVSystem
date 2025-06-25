@@ -160,7 +160,9 @@ public class TaskScheduler : MonoBehaviour
             // 中断当前任务（重新加入队列）
             var interruptedTask = agv.CurrentTask;
             interruptedTask.Status = TaskStatus.Pending;
-            carController.Tasks.Add(interruptedTask);
+            //carController.Tasks.Add(interruptedTask);\
+
+            carController.Tasks.Insert(2, interruptedTask);
 
             StartNextTask();
         }
