@@ -38,8 +38,8 @@ public class CarController : MonoBehaviour
             };
         }
     }
+   
 
-    
 
     private CarController()
     {
@@ -54,28 +54,54 @@ public class CarController : MonoBehaviour
     public int startIndex = 1;
     public int currentIndex;
     public List<TransportTask> Tasks = new List<TransportTask>();
-    
-    public int electric;//剩余电量
-    public float time//预计完成时间
+
+    [Header("Energy Settings")]
+    [SerializeField] private float maxElectric = 100f; // 最大电量
+    [SerializeField] private float energyConsumptionPerSecond = 0.5f;  // 每秒消耗的电量
+    public float electric; // 当前电量
+
+
+
+
+    public float EstimatedEnergyConsumption; // 预估总能耗
+
+    public float EstimatedTimeToComplete; // 预估完成时间(秒)
+
+    // 计算路径的预估能耗和完成时间
+    private void CalculatePathEstimations(List<int> nodeIndices)
     {
-        get
+        if (nodeIndices == null || nodeIndices.Count < 2 || graph == null)
         {
-            return 0;
+            EstimatedEnergyConsumption = 0f;
+            EstimatedTimeToComplete = 0f;
+            return;
         }
+
+        // 计算总距离
+        float totalDistance = 0f;
+        for (int i = 0; i < nodeIndices.Count - 1; i++)
+        {
+            Vector3 startPos = graph.GetNode(nodeIndices[i]).Position;
+            Vector3 endPos = graph.GetNode(nodeIndices[i + 1]).Position;
+            totalDistance += Vector3.Distance(startPos, endPos);
+        }
+
+        // 计算预估时间 = 总距离 / 移动速度
+        EstimatedTimeToComplete = totalDistance / moveSpeed;
+
+        // 计算预估能耗 = 每秒能耗 * 预估时间
+        EstimatedEnergyConsumption = energyConsumptionPerSecond * EstimatedTimeToComplete;
+
+        Debug.Log($"路径预估 - 距离: {totalDistance}m, 时间: {EstimatedTimeToComplete:F1}s, 能耗: {EstimatedEnergyConsumption:F1}单位");
     }
-    public float total_energy { get; }//路径能耗
 
-    public bool exception;//是否异常
-    private float per_energy { get; }
 
-    
-
-    private float per_distance;
 
     private void Start()
     {
         _pathfindingServe = PathfindingService.Instance;
         graph = _pathfindingServe._graph;
+        electric = maxElectric; // 初始化电量
     }
    
     [SerializeField] private float moveSpeed = 5f; // 移动速度
@@ -105,9 +131,10 @@ public class CarController : MonoBehaviour
         }
 /*        this.gameObject.transform.position = graph.GetNode(startIndex).Position;*/
         SetPath(_path);
-        
-        
     }
+
+
+    
     private void SetPath(List<int> nodeIndices)
     {
         if (nodeIndices == null || nodeIndices.Count == 0 || graph == null)
@@ -118,7 +145,7 @@ public class CarController : MonoBehaviour
 
         // 2. 把节点位置转换成 world-space 路径
         path.Clear();
-
+        CalculatePathEstimations(nodeIndices);
         foreach (int id in pathNodeIndices)
         {
             Debug.Log(path.Count);
@@ -178,6 +205,24 @@ public class CarController : MonoBehaviour
                 OnPathCompleted();
             }
         }
+
+        if (electric > 0 && isMoving)
+        {
+            float energyConsumed = energyConsumptionPerSecond * Time.deltaTime;
+            electric -= energyConsumed;
+            electric = Mathf.Max(0, electric); // 防止电量变负
+
+            Debug.Log($"Current Energy: {electric:F1}");
+        }
+
+        // 电量耗尽时停止移动
+        if (electric <= 0)
+        {
+            isMoving = false;
+            Debug.LogWarning("电量耗尽！小车已停止。");
+        }
+
+
     }
     public int GetCurrentNodeId()
     {
