@@ -24,7 +24,7 @@
 
             // 检查起点节点
             var startNode = graph.GetNode(startId);
-            if (startNode == null || startNode.Type != WarehouseGraph.NodeType.Shelf)
+            if (startNode == null || (startNode.Type != WarehouseGraph.NodeType.Shelf && startNode.Type!=WarehouseGraph.NodeType.InPort && startNode.Type != WarehouseGraph.NodeType.OutPort))
             {
                 feedbackText.text = "起点不是有效的货架节点！";
                 return;
@@ -39,7 +39,7 @@
 
             // 检查终点节点
             var endNode = graph.GetNode(endId);
-            if (endNode == null || endNode.Type != WarehouseGraph.NodeType.Shelf)
+            if (endNode == null || (endNode.Type != WarehouseGraph.NodeType.Shelf && startNode.Type != WarehouseGraph.NodeType.InPort && startNode.Type != WarehouseGraph.NodeType.OutPort))
             {
                 feedbackText.text = "终点不是有效的货架节点！";
                 return;
