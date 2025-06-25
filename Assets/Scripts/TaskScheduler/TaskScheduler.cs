@@ -222,6 +222,7 @@ public class TaskScheduler : MonoBehaviour
 
             // 插入到正确位置
             carController.Tasks.Insert(insertIndex, interruptedTask);
+            agv.CurrentTask = null; // 清除当前任务
 
             StartNextTask();
         }
@@ -237,7 +238,7 @@ public class TaskScheduler : MonoBehaviour
 
         var nextTask = carController.Tasks[0];
         carController.Tasks.RemoveAt(0);
-
+        
         carController._agv.CurrentTask = nextTask;
         AssignTask(carController._agv);
     }
@@ -279,6 +280,7 @@ public class TaskScheduler : MonoBehaviour
 
         // 更新任务状态
         currentTask.Status = TaskStatus.Completed;
+        agv.CurrentTask = null; // 清除当前任务
 
         // 开始下一个任务
         StartNextTask();
