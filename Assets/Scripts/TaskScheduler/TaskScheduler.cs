@@ -260,6 +260,7 @@ public class TaskScheduler : MonoBehaviour
             case TaskType.Pickup:
                 // 从货架取货
                 var sourceNode = graph.GetNode(currentTask.SourceNode);
+                Debug.LogWarning(sourceNode.Weight);
                 float pickupAmount = Mathf.Min(sourceNode.Weight, agv.MaxLoad - agv.Loads);
                 sourceNode.Weight -= pickupAmount;
                 agv.Loads += pickupAmount;
