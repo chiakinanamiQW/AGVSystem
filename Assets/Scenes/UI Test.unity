@@ -448,12 +448,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startIndex: 1102
   currentIndex: 0
+  maxElectric: 100
+  energyConsumptionPerSecond: 0.5
+  energyThreshold: 95
   electric: 0
-  exception: 0
+  EstimatedEnergyConsumption: 0
+  EstimatedTimeToComplete: 0
   moveSpeed: 5
   rotationSpeed: 5
   reachedDistance: 0.1
   currentPathIndex: 0
+  calculated: 1
 --- !u!4 &375582855 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 8b0d19231d172054a9757c685ce23b92, type: 3}
@@ -2404,12 +2409,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startIndex: 1102
   currentIndex: 0
+  maxElectric: 100
+  energyConsumptionPerSecond: 0.5
+  energyThreshold: 0
   electric: 0
-  exception: 0
+  EstimatedEnergyConsumption: 0
+  EstimatedTimeToComplete: 0
   moveSpeed: 5
   rotationSpeed: 5
   reachedDistance: 0.1
   currentPathIndex: 0
+  calculated: 1
 --- !u!65 &2055740680
 BoxCollider:
   m_ObjectHideFlags: 0

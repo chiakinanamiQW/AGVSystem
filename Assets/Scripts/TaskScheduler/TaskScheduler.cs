@@ -140,7 +140,7 @@ public class TaskScheduler : MonoBehaviour
         TransportTask chargeTask = new TransportTask
         {
             TaskID = GenerateTaskID(),
-            Type = TaskType.Delivery,
+            Type = TaskType.Charge,
             SourceNode = cur,
             TargetNode = target,
             Priority = 9999999999f,
@@ -263,6 +263,7 @@ public class TaskScheduler : MonoBehaviour
                 float pickupAmount = Mathf.Min(sourceNode.Weight, agv.MaxLoad - agv.Loads);
                 sourceNode.Weight -= pickupAmount;
                 agv.Loads += pickupAmount;
+                Debug.LogWarning("取货完毕");
                 break;
 
             case TaskType.Delivery:
@@ -272,9 +273,12 @@ public class TaskScheduler : MonoBehaviour
                 float deliveryAmount = Mathf.Min(agv.Loads, availableCapacity);
                 targetNode.Weight += deliveryAmount;
                 agv.Loads -= deliveryAmount;
+                Debug.LogWarning("送货完毕");
                 break;
             case TaskType.Charge:
                 CarController.Instance.electric = 100f;
+                CarController.Instance.calculated = true;
+                Debug.LogWarning("充电完毕");
                 break;
         }
 
