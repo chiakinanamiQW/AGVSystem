@@ -100,6 +100,8 @@ public class TaskScheduler : MonoBehaviour
 
         // 添加到任务列表并排序
 
+        pickupTask.AssociatedTaskID = deliveryTask.TaskID;
+        deliveryTask.AssociatedTaskID=pickupTask.TaskID;
 
 
         CarController.Instance.Tasks.Add(pickupTask);
@@ -112,7 +114,7 @@ public class TaskScheduler : MonoBehaviour
         CarController.Instance.Tasks.Sort((a, b) =>
         {
             if (a.Priority != b.Priority)
-                return b.Priority.CompareTo(a.Priority); // 高优先级在前
+                return b.Priority.CompareTo(a.Priority); // 高优先级在前x     
             return a.Type.CompareTo(b.Type); // Pickup在前
         });
 
@@ -157,12 +159,33 @@ public class TaskScheduler : MonoBehaviour
                  carController.Tasks[0].Priority > agv.CurrentTask?.Priority &&
                  agv.Loads <= 0)
         {
-            // 中断当前任务（重新加入队列）
+            //// 中断当前任务（重新加入队列）
+            //var interruptedTask = agv.CurrentTask;
+            //interruptedTask.Status = TaskStatus.Pending;
+            ////carController.Tasks.Add(interruptedTask);\
+
+            //carController.Tasks.Insert(2, interruptedTask);
+
+            //StartNextTask();
+            // 中断当前任务（插入到正确位置）
             var interruptedTask = agv.CurrentTask;
             interruptedTask.Status = TaskStatus.Pending;
-            //carController.Tasks.Add(interruptedTask);\
 
-            carController.Tasks.Insert(2, interruptedTask);
+            // 关键修改：找到关联的Delivery任务位置
+            int insertIndex = 0;
+            for (int i = 0; i < carController.Tasks.Count; i++)
+            {
+                // 如果是当前任务的Delivery任务，就插入在前面
+                if (carController.Tasks[i].Type == TaskType.Delivery &&
+                    carController.Tasks[i].SourceNode == interruptedTask.TargetNode)
+                {
+                    insertIndex = i;
+                    break;
+                }
+            }
+
+            // 插入到正确位置
+            carController.Tasks.Insert(insertIndex, interruptedTask);
 
             StartNextTask();
         }
@@ -272,6 +295,8 @@ public class TransportTask
     public float Priority;      // 任务优先级（值越高越紧急）
     public TaskScheduler.TaskStatus Status;   // 任务当前状态
     public int ShelfNodeID;     // 关联的货架节点ID（用于快速访问）
+
+    public int AssociatedTaskID = -1;
 }
 
 /// <summary>
