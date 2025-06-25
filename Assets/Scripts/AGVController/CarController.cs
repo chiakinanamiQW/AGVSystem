@@ -153,13 +153,13 @@ public class CarController : MonoBehaviour
         CalculatePathEstimations(nodeIndices);
         foreach (int id in pathNodeIndices)
         {
-            Debug.Log(path.Count);
+            
             var node = graph.GetNode(id);
-           Debug.Log(node);
+           
             if (node != null)
                 path.Add(node.Position);
         }
-        Debug.Log(path.Count);
+       
 
         // 3. 重置行进状态
         currentPathIndex = 0;
@@ -169,12 +169,53 @@ public class CarController : MonoBehaviour
         // 4. 初始化 currentIndex——此时 AGV 位于路径第一个节点上
         currentIndex = pathNodeIndices[0];
     }
-
+    public bool calculated = true;
     void Update()
     {
         if (graph == null) { Debug.Log("graph为空"); }
         if (!isMoving || path.Count == 0) return;
-        
+
+
+        if (electric > 0 && isMoving)
+        {
+            float energyConsumed = energyConsumptionPerSecond * Time.deltaTime;
+            electric -= energyConsumed;
+            electric = Mathf.Max(0, electric); // 防止电量变负
+
+            Debug.Log($"Current Energy: {electric:F1}");
+        }
+        if (electric < energyThreshold && calculated)
+        {
+            charge1 = _pathfindingServe.FindPath(currentIndex, 1101, _agv);
+            charge2 = _pathfindingServe.FindPath(currentIndex, 1102, _agv);
+            charge3 = _pathfindingServe.FindPath(currentIndex, 3101, _agv);
+            charge4 = _pathfindingServe.FindPath(currentIndex, 3102, _agv);
+            int minCount = charge1.Count;
+            int target = 1101;
+            if (charge2.Count < minCount)
+            {
+                minCount = charge2.Count;
+                target = 1102;
+            }
+            if (charge3.Count < minCount)
+            {
+                minCount = charge2.Count;
+                target = 3101;
+            }
+            if (charge4.Count < minCount)
+            {
+                minCount = charge2.Count;
+                target = 3102;
+            }
+            calculated = false;
+            TaskScheduler.Instance.CreateChargeTask(currentIndex, target);
+        }
+        // 电量耗尽时停止移动
+        if (electric <= 0)
+        {
+            isMoving = false;
+            Debug.LogWarning("电量耗尽！小车已停止。");
+        }
         // 获取当前目标点
         Vector3 targetPosition = path[currentPathIndex];
 
@@ -211,29 +252,7 @@ public class CarController : MonoBehaviour
             }
         }
 
-        if (electric > 0 && isMoving)
-        {
-            float energyConsumed = energyConsumptionPerSecond * Time.deltaTime;
-            electric -= energyConsumed;
-            electric = Mathf.Max(0, electric); // 防止电量变负
-
-            Debug.Log($"Current Energy: {electric:F1}");
-        }
-        if (electric < energyThreshold) 
-        {
-            charge1 = _pathfindingServe.FindPath(currentIndex,1101,_agv);
-            charge2 = _pathfindingServe.FindPath(currentIndex,1102,_agv);
-            charge3 = _pathfindingServe.FindPath(currentIndex,3101,_agv);
-            charge4 = _pathfindingServe.FindPath(currentIndex,3102,_agv);
-            int target = Mathf.Min(charge1.Count,charge2.Count,charge3.Count,charge4.Count);
-            TaskScheduler.Instance.CreateChargeTask(currentIndex,target);
-        }
-        // 电量耗尽时停止移动
-        if (electric <= 0)
-        {
-            isMoving = false;
-            Debug.LogWarning("电量耗尽！小车已停止。");
-        }
+        
 
 
     }
@@ -244,7 +263,7 @@ public class CarController : MonoBehaviour
     // 路径完成时的回调
     private void OnPathCompleted()
     {
-        Debug.Log("Path completed!");
+        Debug.LogWarning("Path completed!");
         TaskScheduler.Instance.OnTaskCompleted(_agv);
        
     }
