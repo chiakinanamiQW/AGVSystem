@@ -58,8 +58,13 @@ public class CarController : MonoBehaviour
     [Header("Energy Settings")]
     [SerializeField] private float maxElectric = 100f; // 最大电量
     [SerializeField] private float energyConsumptionPerSecond = 0.5f;  // 每秒消耗的电量
+    [SerializeField] private float energyThreshold = 20f;
     public float electric; // 当前电量
-
+    
+    private List<int> charge1 = new List<int>();
+    private List<int> charge2 = new List<int>();
+    private List<int> charge3 = new List<int>();
+    private List<int> charge4 = new List<int>();
 
 
 
@@ -214,7 +219,15 @@ public class CarController : MonoBehaviour
 
             Debug.Log($"Current Energy: {electric:F1}");
         }
-
+        if (electric < energyThreshold) 
+        {
+            charge1 = _pathfindingServe.FindPath(currentIndex,1101,_agv);
+            charge2 = _pathfindingServe.FindPath(currentIndex,1102,_agv);
+            charge3 = _pathfindingServe.FindPath(currentIndex,3101,_agv);
+            charge4 = _pathfindingServe.FindPath(currentIndex,3102,_agv);
+            int target = Mathf.Min(charge1.Count,charge2.Count,charge3.Count,charge4.Count);
+            TaskScheduler.Instance.CreateChargeTask(currentIndex,target);
+        }
         // 电量耗尽时停止移动
         if (electric <= 0)
         {

@@ -152,10 +152,10 @@ public class PathfindingService
         // 规划多个任务的路径：取货 -> 送货 -> 充电
         var path = FindPath(agv.CurrentNode, task.SourceNode, agv);
         path.AddRange(FindPath(task.SourceNode, task.TargetNode, agv));
-        if (agv.BatteryLevel < 20) // 假设电量小于20%时需要充电
+       /* if (agv.BatteryLevel < 20) // 假设电量小于20%时需要充电
         {
             path.AddRange(FindPath(task.TargetNode, 0, agv)); // 假设充电站在节点0
-        }
+        }*/
 
         return path;
     }

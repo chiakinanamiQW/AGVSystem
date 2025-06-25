@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using static TaskScheduler;
+using static Unity.VisualScripting.Member;
+using static UnityEngine.GraphicsBuffer;
 
 /// <summary>
 /// 任务调度器：负责AGV（自动导引车）任务的创建、分配和管理
@@ -98,6 +100,9 @@ public class TaskScheduler : MonoBehaviour
             ShelfNodeID = target
         };
 
+        
+       
+
         // 添加到任务列表并排序
 
         pickupTask.AssociatedTaskID = deliveryTask.TaskID;
@@ -121,7 +126,38 @@ public class TaskScheduler : MonoBehaviour
         // 处理任务执行顺序
         HandleTaskExecution();
     }
+    public void CreateChargeTask(int cur,int target)
+    {
+        if (_pathfindingService == null)
+        {
+            Debug.LogError("PathfindingService 未初始化！");
+            return;
+        }
 
+        // 获取图实例
+        var graph = _pathfindingService._graph;
+
+        TransportTask chargeTask = new TransportTask
+        {
+            TaskID = GenerateTaskID(),
+            Type = TaskType.Delivery,
+            SourceNode = cur,
+            TargetNode = target,
+            Priority = 9999999999f,
+            Status = TaskStatus.Pending,
+            ShelfNodeID = target
+        };
+
+        CarController.Instance.Tasks.Add(chargeTask);
+        CarController.Instance.Tasks.Sort((a, b) =>
+        {
+            if (a.Priority != b.Priority)
+                return b.Priority.CompareTo(a.Priority); // 高优先级在前x     
+            return a.Type.CompareTo(b.Type); // Pickup在前
+        });
+        HandleTaskExecution();
+
+    }
     /// <summary>
     /// 为指定AGV分配任务（计算路径并更新AGV状态）
     /// </summary>
@@ -236,6 +272,9 @@ public class TaskScheduler : MonoBehaviour
                 targetNode.Weight += deliveryAmount;
                 agv.Loads -= deliveryAmount;
                 break;
+            case TaskType.Charge:
+                CarController.Instance.electric = 100f;
+                break;
         }
 
         // 更新任务状态
@@ -298,6 +337,7 @@ public class TransportTask
 
     public int AssociatedTaskID = -1;
 }
+
 
 /// <summary>
 /// AGV代理类扩展
