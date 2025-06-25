@@ -1,59 +1,60 @@
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.UI;
+public class TaskInputHandler : MonoBehaviour
+{
+public InputField startNodeInput;
+public InputField endNodeInput;
+public InputField priorityInput;
+public Text feedbackText;
 
-    public class TaskInputHandler : MonoBehaviour
+
+public void OnSubmitTask()
+{
+        // éªŒè¯è¾“å…¥
+    if (!int.TryParse(startNodeInput.text, out int startId) ||
+            !int.TryParse(endNodeInput.text, out int endId) ||
+            !float.TryParse(priorityInput.text, out float priority))
     {
-        public InputField startNodeInput;
-        public InputField endNodeInput;
-        public InputField priorityInput;
-        public Text feedbackText;
-
-        public void OnSubmitTask()
-        {
-            // ÑéÖ¤ÊäÈë
-            if (!int.TryParse(startNodeInput.text, out int startId) ||
-                !int.TryParse(endNodeInput.text, out int endId) ||
-                !float.TryParse(priorityInput.text, out float priority))
-            {
-                feedbackText.text = "ÊäÈëÎŞĞ§£¬Çë¼ì²é¸ñÊ½£¡";
-                return;
-            }
-
-            // »ñÈ¡Í¼ÊµÀı
-            var graph = PathfindingService.Instance._graph;
-
-            // ¼ì²éÆğµã½Úµã
-            var startNode = graph.GetNode(startId);
-            if (startNode == null || (startNode.Type != WarehouseGraph.NodeType.Shelf && startNode.Type!=WarehouseGraph.NodeType.InPort && startNode.Type != WarehouseGraph.NodeType.OutPort))
-            {
-                feedbackText.text = "Æğµã²»ÊÇÓĞĞ§µÄ»õ¼Ü½Úµã£¡";
-                return;
-            }
-
-            // ¼ì²éÆğµãÊÇ·ñÓĞ»õÎï
-            if (startNode.Weight <= 0)
-            {
-                feedbackText.text = "Æğµã»õ¼ÜÃ»ÓĞ»õÎï£¡";
-                return;
-            }
-
-            // ¼ì²éÖÕµã½Úµã
-            var endNode = graph.GetNode(endId);
-            if (endNode == null || (endNode.Type != WarehouseGraph.NodeType.Shelf && endNode.Type != WarehouseGraph.NodeType.InPort && endNode.Type != WarehouseGraph.NodeType.OutPort))
-            {
-                feedbackText.text = "ÖÕµã²»ÊÇÓĞĞ§µÄ»õ¼Ü½Úµã£¡";
-                return;
-            }
-
-            // ¼ì²éÖÕµãÈİÁ¿
-            if (endNode.Weight >= endNode.WeightLimit)
-            {
-                feedbackText.text = "ÖÕµã»õ¼ÜÒÑÂú£¡";
-                return;
-            }
-
-            // ´´½¨ÈÎÎñ
-            TaskScheduler.Instance.CreateTransportTask(startId, endId, priority);
-            feedbackText.text = "ÈÎÎñ´´½¨³É¹¦£¡";
-        }
+            feedbackText.text = "è¾“å…¥æ— æ•ˆï¼Œè¯·æ£€æŸ¥æ ¼å¼ï¼";
+            return;
     }
+
+        // è·å–å›¾å®ä¾‹
+    var graph = PathfindingService.Instance._graph;
+
+        // æ£€æŸ¥èµ·ç‚¹èŠ‚ç‚¹
+    var startNode = graph.GetNode(startId);
+    if (startNode == null || (startNode.Type != WarehouseGraph.NodeType.Shelf && startNode.Type!=WarehouseGraph.NodeType.InPort && startNode.Type != WarehouseGraph.NodeType.OutPort))
+    {
+            feedbackText.text = "èµ·ç‚¹ä¸æ˜¯æœ‰æ•ˆçš„è´§æ¶èŠ‚ç‚¹ï¼";
+            return;
+    }
+
+        // æ£€æŸ¥èµ·ç‚¹æ˜¯å¦æœ‰è´§ç‰©
+        if (startNode.Weight <= 0)
+        {
+            feedbackText.text = "èµ·ç‚¹è´§æ¶æ²¡æœ‰è´§ç‰©ï¼";
+            return;
+        }
+
+        // æ£€æŸ¥ç»ˆç‚¹èŠ‚ç‚¹
+        var endNode = graph.GetNode(endId);
+        if (endNode == null || (endNode.Type != WarehouseGraph.NodeType.Shelf && endNode.Type != WarehouseGraph.NodeType.InPort && endNode.Type != WarehouseGraph.NodeType.OutPort))
+        {
+            feedbackText.text = "ç»ˆç‚¹ä¸æ˜¯æœ‰æ•ˆçš„è´§æ¶èŠ‚ç‚¹ï¼";
+            return;
+        }
+
+        // æ£€æŸ¥ç»ˆç‚¹å®¹é‡
+        if (endNode.Weight >= endNode.WeightLimit)
+        {
+            feedbackText.text = "ç»ˆç‚¹è´§æ¶å·²æ»¡ï¼";
+            return;
+        }
+
+        // åˆ›å»ºä»»åŠ¡
+        TaskScheduler.Instance.CreateTransportTask(startId, endId, priority);
+        feedbackText.text = "ä»»åŠ¡åˆ›å»ºæˆåŠŸï¼";
+    }
+  
+}
