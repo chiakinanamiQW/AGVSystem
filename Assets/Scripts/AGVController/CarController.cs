@@ -24,7 +24,7 @@ public class CarController : MonoBehaviour
             return _instance;
         }
     }
-    public WarehouseGraph _graph;
+    
 
     private void Awake()
     {
@@ -39,10 +39,7 @@ public class CarController : MonoBehaviour
         }
     }
 
-    private CarController(WarehouseGraph graph)
-    {
-        _graph = graph;
-    }
+    
 
     private CarController()
     {
@@ -93,14 +90,17 @@ public class CarController : MonoBehaviour
     // 设置路径并开始移动
     public void CarMove(int end)
     {
+       
         if (times > 0)
         {
             _path = _pathfindingServe.FindPath(currentIndex, end, _agv);
             times++;
+            Debug.Log(_path);
         }
         else
         {
             _path = _pathfindingServe.FindPath(startIndex, end, _agv);
+            Debug.Log(_path[0]);
             times++;
         }
 /*        this.gameObject.transform.position = graph.GetNode(startIndex).Position;*/
@@ -118,25 +118,31 @@ public class CarController : MonoBehaviour
 
         // 2. 把节点位置转换成 world-space 路径
         path.Clear();
+
         foreach (int id in pathNodeIndices)
         {
+            Debug.Log(path.Count);
             var node = graph.GetNode(id);
+           Debug.Log(node);
             if (node != null)
                 path.Add(node.Position);
         }
+        Debug.Log(path.Count);
 
         // 3. 重置行进状态
         currentPathIndex = 0;
         isMoving = true;
-
+        
+        
         // 4. 初始化 currentIndex——此时 AGV 位于路径第一个节点上
         currentIndex = pathNodeIndices[0];
     }
 
     void Update()
     {
+        if (graph == null) { Debug.Log("graph为空"); }
         if (!isMoving || path.Count == 0) return;
-
+        
         // 获取当前目标点
         Vector3 targetPosition = path[currentPathIndex];
 

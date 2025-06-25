@@ -10,7 +10,7 @@ public class PathFindTest : MonoBehaviour
     private PathfindingService _pathfindingService;
     private AGVAgent _agv;
     private List<int> _path = new List<int>();
-    void Start()
+    void Awake()
     {
         _pathfindingService = PathfindingService.Instance;
         _pathfindingService.GenerateTestGraph1();
