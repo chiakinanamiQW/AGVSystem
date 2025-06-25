@@ -105,7 +105,7 @@ public class PathfindingService
                     break;
                 case WarehouseGraph.NodeType.Shelf:
                     Gizmos.color = Color.gray;
-                    Gizmos.DrawCube(node.Position, new Vector3(3f, 2.0f, 3f));
+                    Gizmos.DrawCube(node.Position, new Vector3(0.3f, 0.2f, 0.3f));
                     break;
                 case WarehouseGraph.NodeType.Elevator:
                     Gizmos.color = Color.white;
@@ -113,7 +113,7 @@ public class PathfindingService
                     break;
                 case WarehouseGraph.NodeType.Charger:
                     Gizmos.color = Color.red;
-                    Gizmos.DrawCube(node.Position, new Vector3(3f, 1.0f, 3f));
+                    Gizmos.DrawCube(node.Position, new Vector3(0.3f, 0.1f, 0.3f));
                     break;
                 case WarehouseGraph.NodeType.OutPort:
                     Gizmos.color = Color.green;

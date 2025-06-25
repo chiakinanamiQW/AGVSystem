@@ -98,6 +98,7 @@ public class WarehouseGraph
     }
 
     // 节点类：表示仓库中的一个节点（如货架、电梯、充电点等）
+    [System.Serializable]
     public class Node
     {
         public int ID;                      // 节点唯一标识符

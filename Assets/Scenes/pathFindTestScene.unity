@@ -575,6 +575,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &894533297
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 894533299}
+  - component: {fileID: 894533298}
+  m_Layer: 0
+  m_Name: SceneCreater
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &894533298
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894533297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5692b5c6c36df04daead9cb3148b52b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chargerPrefab: {fileID: 2537283239987962371, guid: 725ca7128ce667045b9ec62c1a5eeaba, type: 3}
+  doorPrefab: {fileID: 5898400723994667398, guid: 61c067b7284d83f459673cfed664977c, type: 3}
+  elevatorPrefab: {fileID: 4677941858129631515, guid: d94fb4d0dbd789745a40ca29b31d76fe, type: 3}
+  goodsPrefab: {fileID: 5736881700636027147, guid: ab5152a458e8f1b43b81a40e32c4ca74, type: 3}
+  shelfPrefab: {fileID: 8448468515584974406, guid: ed52c58b66e312a4d8242977f97c40fe, type: 3}
+--- !u!4 &894533299
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894533297}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.91305584, y: 3.8847578, z: -0.5786479}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &992656202
 GameObject:
   m_ObjectHideFlags: 0
@@ -823,10 +872,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startIndex: 1102
   currentIndex: 0
+  maxElectric: 100
+  energyConsumptionPerSecond: 0.5
+  energyThreshold: 20
+  electric: 0
+  EstimatedEnergyConsumption: 0
+  EstimatedTimeToComplete: 0
   moveSpeed: 5
   rotationSpeed: 5
   reachedDistance: 0.1
   currentPathIndex: 0
+  calculated: 1
 --- !u!65 &2055740680
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -923,3 +979,4 @@ SceneRoots:
   - {fileID: 2055740683}
   - {fileID: 992656206}
   - {fileID: 1716660790}
+  - {fileID: 894533299}
