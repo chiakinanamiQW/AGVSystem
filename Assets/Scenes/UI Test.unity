@@ -450,7 +450,7 @@ MonoBehaviour:
   currentIndex: 0
   maxElectric: 100
   energyConsumptionPerSecond: 0.5
-  energyThreshold: 95
+  energyThreshold: 20
   electric: 0
   EstimatedEnergyConsumption: 0
   EstimatedTimeToComplete: 0
