@@ -25,15 +25,13 @@ public class NodeGameObject : MonoBehaviour
         
         if (Node.Type == WarehouseGraph.NodeType.Shelf)
         {
-            material.SetColor("_Color", GetColor( 1 - (Node.Weight / Node.WeightLimit)));
+            material.SetColor("_Color", GetColor(Node.Weight / Node.WeightLimit));
         }
             
     }
     private Color GetColor(float t)
     {
-        int R = (int)(255 * (1 - t));
-        int G = (int)(255 * t);
-        int B = 0;
-        return new Color(R, G, B);
+        t = Mathf.SmoothStep(0, 1, t);
+        return Color.Lerp(Color.red, Color.green, t);
     }
 }
