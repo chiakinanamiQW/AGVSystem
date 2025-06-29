@@ -351,5 +351,5 @@ public class TransportTask
 /// </summary>
 public partial class AGVAgent
 {
-    public float MaxLoad = 100f; // AGV最大载重量
+    public float MaxLoad = 10f; // AGV最大载重量
 }
