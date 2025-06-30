@@ -11,7 +11,8 @@ public class UIController : MonoBehaviour
         var scheduler = TaskScheduler.Instance;
     }
 
-    public void OnCreateTaskClicked()
+
+public void OnCreateTaskClicked()
     {
         taskInputHandler.OnSubmitTask();
         

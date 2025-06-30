@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CarController : MonoBehaviour
 {
@@ -24,7 +25,7 @@ public class CarController : MonoBehaviour
             return _instance;
         }
     }
-    
+
 
     private void Awake()
     {
@@ -38,7 +39,7 @@ public class CarController : MonoBehaviour
             };
         }
     }
-   
+
 
 
     private CarController()
@@ -48,7 +49,7 @@ public class CarController : MonoBehaviour
 
     private PathfindingService _pathfindingServe = PathfindingService.Instance;
     private WarehouseGraph graph;
-    private  List<int> _path = new List<int>();
+    private List<int> _path = new List<int>();
     public AGVAgent _agv;
     private int times = 0;
     public int startIndex = 1;
@@ -60,7 +61,7 @@ public class CarController : MonoBehaviour
     [SerializeField] private float energyConsumptionPerSecond = 0.5f;  // 每秒消耗的电量
     [SerializeField] private float energyThreshold = 20f;
     public float electric; // 当前电量
-    
+
     private List<int> charge1 = new List<int>();
     private List<int> charge2 = new List<int>();
     private List<int> charge3 = new List<int>();
@@ -108,7 +109,7 @@ public class CarController : MonoBehaviour
         graph = _pathfindingServe._graph;
         electric = maxElectric; // 初始化电量
     }
-   
+
     [SerializeField] private float moveSpeed = 5f; // 移动速度
     [SerializeField] private float rotationSpeed = 5f; // 旋转速度
     [SerializeField] private float reachedDistance = 0.1f; // 到达节点的判定距离
@@ -117,11 +118,11 @@ public class CarController : MonoBehaviour
     private List<Vector3> path = new List<Vector3>(); // 存储路径位置
     public int currentPathIndex = 0; // 当前路径点索引
     private bool isMoving = false; // 是否正在移动
-    
+
     // 设置路径并开始移动
     public void CarMove(int end)
     {
-       
+
         if (times > 0)
         {
             _path = _pathfindingServe.FindPath(currentIndex, end, _agv);
@@ -134,12 +135,12 @@ public class CarController : MonoBehaviour
             Debug.Log(_path[0]);
             times++;
         }
-/*        this.gameObject.transform.position = graph.GetNode(startIndex).Position;*/
+        /*        this.gameObject.transform.position = graph.GetNode(startIndex).Position;*/
         SetPath(_path);
     }
 
 
-    
+
     private void SetPath(List<int> nodeIndices)
     {
         if (nodeIndices == null || nodeIndices.Count == 0 || graph == null)
@@ -153,19 +154,19 @@ public class CarController : MonoBehaviour
         CalculatePathEstimations(nodeIndices);
         foreach (int id in pathNodeIndices)
         {
-            
+
             var node = graph.GetNode(id);
-           
+
             if (node != null)
                 path.Add(node.Position);
         }
-       
+
 
         // 3. 重置行进状态
         currentPathIndex = 0;
         isMoving = true;
-        
-        
+
+
         // 4. 初始化 currentIndex——此时 AGV 位于路径第一个节点上
         currentIndex = pathNodeIndices[0];
     }
@@ -252,7 +253,7 @@ public class CarController : MonoBehaviour
             }
         }
 
-        
+
 
 
     }
@@ -265,7 +266,7 @@ public class CarController : MonoBehaviour
     {
         Debug.LogWarning("Path completed!");
         TaskScheduler.Instance.OnTaskCompleted(_agv);
-       
+
     }
 
     // 绘制路径Gizmos（可选，用于调试）
@@ -286,5 +287,15 @@ public class CarController : MonoBehaviour
             Gizmos.DrawSphere(path[currentPathIndex], 0.2f);
         }
     }
+
+    //hsh的ui
+
+    public void Start()
+    {
+     public Text t;
+    t.text = "电量：" ;
+    }
+
+
 }
 
