@@ -31,7 +31,7 @@ public class PathfindingService
     {
         _graph = new WarehouseGraph();
     }
-    
+
     public List<int> FindPath(int start, int end, AGVAgent agv)//寻找start到end的路径
     {
         if (_graph == null || _graph.GetNode(start) == null || _graph.GetNode(end) == null)
@@ -105,7 +105,7 @@ public class PathfindingService
                     break;
                 case WarehouseGraph.NodeType.Shelf:
                     Gizmos.color = Color.gray;
-                    Gizmos.DrawCube(node.Position, new Vector3(3f, 2.0f, 3f));
+                    Gizmos.DrawCube(node.Position, new Vector3(0.3f, 0.2f, 0.3f));
                     break;
                 case WarehouseGraph.NodeType.Elevator:
                     Gizmos.color = Color.white;
@@ -113,7 +113,7 @@ public class PathfindingService
                     break;
                 case WarehouseGraph.NodeType.Charger:
                     Gizmos.color = Color.red;
-                    Gizmos.DrawCube(node.Position, new Vector3(3f, 1.0f, 3f));
+                    Gizmos.DrawCube(node.Position, new Vector3(0.3f, 0.1f, 0.3f));
                     break;
                 case WarehouseGraph.NodeType.OutPort:
                     Gizmos.color = Color.green;
@@ -147,49 +147,19 @@ public class PathfindingService
         var targetNode = _graph.GetNode(targetNodeId);
         return Vector3.Distance(node.Position, targetNode.Position); // 使用欧几里得距离作为启发式
     }
-
-    private int GetNodeWithLowestFScore(List<int> openList, Dictionary<int, float> fScores)
-    {
-        int lowestNode = -1;
-        float lowestFScore = float.MaxValue;
-
-        foreach (var node in openList)
-        {
-            if (fScores.ContainsKey(node) && fScores[node] < lowestFScore)
-            {
-                lowestFScore = fScores[node];
-                lowestNode = node;
-            }
-        }
-
-        return lowestNode;
-    }
-
-    private List<int> ReconstructPath(Dictionary<int, int> cameFrom, int currentNode)
-    {
-        var path = new List<int> { currentNode };
-        while (cameFrom.ContainsKey(currentNode))
-        {
-            currentNode = cameFrom[currentNode];
-            path.Insert(0, currentNode);
-        }
-
-        return path;
-    }
-
     public List<int> PlanMultiTaskPath(AGVAgent agv, TransportTask task)
     {
         // 规划多个任务的路径：取货 -> 送货 -> 充电
         var path = FindPath(agv.CurrentNode, task.SourceNode, agv);
         path.AddRange(FindPath(task.SourceNode, task.TargetNode, agv));
-        if (agv.BatteryLevel < 20) // 假设电量小于20%时需要充电
+       /* if (agv.BatteryLevel < 20) // 假设电量小于20%时需要充电
         {
             path.AddRange(FindPath(task.TargetNode, 0, agv)); // 假设充电站在节点0
-        }
+        }*/
 
         return path;
     }
-
+    
     public void GenerateTestGraph()//生成测试仓库图
     {
         // 清除现有图数据
@@ -315,7 +285,6 @@ public class PathfindingService
         _graph.AddDoubleEdge(2108, 3108, 10.0f, false, 0.1f);
 
     }
-
     public void GenerateTestGraph1()
     {
             // 清空现有图数据
@@ -411,11 +380,44 @@ public class PathfindingService
                 for (int j = 0; j < 3; j++)
                 {
                     int shelfID = floor * 1000 + floorShelfID + j;
+                    _graph.GetNode(shelfID).WeightLimit = floor * 20;
                     _graph.GetNode(shelfID).Type = WarehouseGraph.NodeType.Shelf;
+                    if(floor == 1)
+                    {
+                        _graph.GetNode(shelfID).Weight = 10;
+                    }
                 }
             }
         }
 
 
     }
+    private int GetNodeWithLowestFScore(List<int> openList, Dictionary<int, float> fScores)
+    {
+        int lowestNode = -1;
+        float lowestFScore = float.MaxValue;
+
+        foreach (var node in openList)
+        {
+            if (fScores.ContainsKey(node) && fScores[node] < lowestFScore)
+            {
+                lowestFScore = fScores[node];
+                lowestNode = node;
+            }
+        }
+
+        return lowestNode;
+    }
+    private List<int> ReconstructPath(Dictionary<int, int> cameFrom, int currentNode)
+    {
+        var path = new List<int> { currentNode };
+        while (cameFrom.ContainsKey(currentNode))
+        {
+            currentNode = cameFrom[currentNode];
+            path.Insert(0, currentNode);
+        }
+
+        return path;
+    }
 }
+

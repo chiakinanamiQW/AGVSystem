@@ -31,6 +31,7 @@ public class WarehouseGraph
             Position = position,         // 节点位置
             Floor = floor,               // 节点所在楼层
             WeightLimit = weightLimit,   // 节点承重限制
+            Weight = 0.0f,               //默认现承载重量为零
             IsBlocked = false            // 默认节点不被阻塞
         });
     }
@@ -97,6 +98,7 @@ public class WarehouseGraph
     }
 
     // 节点类：表示仓库中的一个节点（如货架、电梯、充电点等）
+    [System.Serializable]
     public class Node
     {
         public int ID;                      // 节点唯一标识符
@@ -104,6 +106,7 @@ public class WarehouseGraph
         public Vector3 Position;            // 节点的三维位置坐标
         public int Floor;                   // 节点所在的楼层编号
         public float WeightLimit;           // 节点的承重限制（用于货架等）
+        public float Weight;                //节点现承载重量（用于货架)
         public bool IsBlocked;              // 节点是否被阻塞（如故障）
     }
 
@@ -130,12 +133,12 @@ public class WarehouseGraph
 }
 
 // AGV代理类：表示自动引导车（AGV）在仓库中的状态
-public class AGVAgent//小车
+public partial class AGVAgent//小车
 {
     public int AGVID;                   // AGV的唯一标识符
     public int CurrentNode;             // AGV当前所在的节点ID
     public float BatteryLevel = 100f;   // AGV的电池电量，默认为100%
-    public List<int> currentPath;       // AGV当前的路径，由节点ID组成的列表
+    public List<int> CurrentPath;       // AGV当前的路径，由节点ID组成的列表
     public TransportTask CurrentTask;   // AGV当前正在执行的任务
-    public float loads;                 // AGV的载重（表示AGV正在承载的货物重量）
+    public float Loads;                 // AGV的载重（表示AGV正在承载的货物重量）
 }
