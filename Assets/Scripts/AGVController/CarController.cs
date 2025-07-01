@@ -26,7 +26,6 @@ public class CarController : MonoBehaviour
         }
     }
 
-
     private void Awake()
     {
         if (_agv == null)
@@ -39,8 +38,6 @@ public class CarController : MonoBehaviour
             };
         }
     }
-
-
 
     private CarController()
     {
@@ -67,10 +64,7 @@ public class CarController : MonoBehaviour
     private List<int> charge3 = new List<int>();
     private List<int> charge4 = new List<int>();
 
-
-
     public float EstimatedEnergyConsumption; // 预估总能耗
-
     public float EstimatedTimeToComplete; // 预估完成时间(秒)
 
     // 计算路径的预估能耗和完成时间
@@ -101,8 +95,6 @@ public class CarController : MonoBehaviour
         Debug.Log($"路径预估 - 距离: {totalDistance}m, 时间: {EstimatedTimeToComplete:F1}s, 能耗: {EstimatedEnergyConsumption:F1}单位");
     }
 
-
-
     private void Start()
     {
         _pathfindingServe = PathfindingService.Instance;
@@ -115,14 +107,18 @@ public class CarController : MonoBehaviour
     [SerializeField] private float reachedDistance = 0.1f; // 到达节点的判定距离
 
     private List<int> pathNodeIndices = new List<int>();
-    private List<Vector3> path = new List<Vector3>(); // 存储路径位置
-    public int currentPathIndex = 0; // 当前路径点索引
+    public List<Vector3> path = new List<Vector3>(); // 存储路径位置 - 改为public
+    public int currentPathIndex = 0; // 当前路径点索引 - 改为public
     private bool isMoving = false; // 是否正在移动
+
+    // 新增：用于UI访问的属性
+    public bool IsMoving => isMoving;
+    public float MaxElectric => maxElectric;
+    public float EnergyThreshold => energyThreshold;
 
     // 设置路径并开始移动
     public void CarMove(int end)
     {
-
         if (times > 0)
         {
             _path = _pathfindingServe.FindPath(currentIndex, end, _agv);
@@ -135,11 +131,8 @@ public class CarController : MonoBehaviour
             Debug.Log(_path[0]);
             times++;
         }
-        /*        this.gameObject.transform.position = graph.GetNode(startIndex).Position;*/
         SetPath(_path);
     }
-
-
 
     private void SetPath(List<int> nodeIndices)
     {
@@ -154,28 +147,25 @@ public class CarController : MonoBehaviour
         CalculatePathEstimations(nodeIndices);
         foreach (int id in pathNodeIndices)
         {
-
             var node = graph.GetNode(id);
-
             if (node != null)
                 path.Add(node.Position);
         }
-
 
         // 3. 重置行进状态
         currentPathIndex = 0;
         isMoving = true;
 
-
         // 4. 初始化 currentIndex——此时 AGV 位于路径第一个节点上
         currentIndex = pathNodeIndices[0];
     }
+
     public bool calculated = true;
+
     void Update()
     {
         if (graph == null) { Debug.Log("graph为空"); }
         if (!isMoving || path.Count == 0) return;
-
 
         if (electric > 0 && isMoving)
         {
@@ -185,6 +175,7 @@ public class CarController : MonoBehaviour
 
             Debug.Log($"Current Energy: {electric:F1}");
         }
+
         if (electric < energyThreshold && calculated)
         {
             charge1 = _pathfindingServe.FindPath(currentIndex, 1101, _agv);
@@ -211,15 +202,16 @@ public class CarController : MonoBehaviour
             calculated = false;
             TaskScheduler.Instance.CreateChargeTask(currentIndex, target);
         }
+
         // 电量耗尽时停止移动
         if (electric <= 0)
         {
             isMoving = false;
             Debug.LogWarning("电量耗尽！小车已停止。");
         }
+
         // 获取当前目标点
         Vector3 targetPosition = path[currentPathIndex];
-
 
         // 移动物体
         transform.position = Vector3.MoveTowards(
@@ -252,21 +244,18 @@ public class CarController : MonoBehaviour
                 OnPathCompleted();
             }
         }
-
-
-
-
     }
+
     public int GetCurrentNodeId()
     {
         return currentIndex;
     }
+
     // 路径完成时的回调
     private void OnPathCompleted()
     {
         Debug.LogWarning("Path completed!");
         TaskScheduler.Instance.OnTaskCompleted(_agv);
-
     }
 
     // 绘制路径Gizmos（可选，用于调试）
@@ -287,15 +276,4 @@ public class CarController : MonoBehaviour
             Gizmos.DrawSphere(path[currentPathIndex], 0.2f);
         }
     }
-
-    //hsh的ui
-
-    public void Start()
-    {
-     public Text t;
-    t.text = "电量：" ;
-    }
-
-
 }
-
