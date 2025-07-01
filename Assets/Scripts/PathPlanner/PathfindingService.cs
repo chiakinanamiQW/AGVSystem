@@ -84,7 +84,8 @@ public class PathfindingService
         
         return null; // 无法到达
     }
-    
+
+#if UNITY_EDITOR
     public void DrawGraphGizmos()//绘制仓库图gizmos
     {
         foreach (var edge in _graph.Edges)
@@ -128,7 +129,7 @@ public class PathfindingService
             Handles.Label(node.Position, node.ID.ToString());
         }
     }
-
+#endif
     public void DrawPathGizmos(List<int> path)//绘制path路径的gizmos
     {
         if (_graph.Edges.Count == 0 || _graph.Edges.Count == 0)

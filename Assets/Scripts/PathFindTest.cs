@@ -18,6 +18,7 @@ public class PathFindTest : MonoBehaviour
         _pathfindingService._graph.UpdateNodeStatus(1003,true);
     }
 
+#if UNITY_EDITOR
     private void OnDrawGizmos()
     {
         if (_pathfindingService != null)
@@ -25,4 +26,7 @@ public class PathFindTest : MonoBehaviour
             _pathfindingService.DrawGraphGizmos();
         }
     }
+#endif
+
 }
+
